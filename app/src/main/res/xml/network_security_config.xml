@@ -1,0 +1,9 @@
+<network-security-config>
+    <!-- Base configuration -->
+    <base-config cleartextTrafficPermitted="true"></base-config>
+
+    <!-- Domain configuration -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">localhost</domain>
+    </domain-config>
+</network-security-config>
