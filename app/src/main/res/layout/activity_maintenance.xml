@@ -8,11 +8,31 @@
     android:orientation="vertical"
     tools:context=".maintenance.MaintenanceActivity">
 
+    <androidx.appcompat.widget.Toolbar
+
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Maintenance Type List"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="20dp"/>
+
+    </androidx.appcompat.widget.Toolbar>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="10dp">
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -22,15 +42,23 @@
             android:text="Back">
         </Button>
 
-        <Button
+       <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btn_add"
             android:textSize="20dp"
             android:layout_marginLeft="5dp"
-            android:text="Add">
+            android:text="Give Complain">
         </Button>
 
     </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/rv_maintenance"
+            android:scrollbars="vertical">
+        </androidx.recyclerview.widget.RecyclerView>
 
 </LinearLayout>

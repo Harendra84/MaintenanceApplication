@@ -1,5 +1,6 @@
 package com.gttech.maintenanceapplication.mess;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +31,9 @@ public class MessAdapter extends RecyclerView.Adapter<MessAdapter.MessViewHolder
     @Override
     public void onBindViewHolder(@NonNull MessViewHolder holder, int position) {
         Mess mess = messList.get(position);
+        holder.tvMessId.setText(mess.getMessId());
         holder.tvMessName.setText(mess.getMessName());
+
     }
 
     @Override
@@ -38,11 +41,15 @@ public class MessAdapter extends RecyclerView.Adapter<MessAdapter.MessViewHolder
         return messList.size();
     }
 
-    public static class MessViewHolder extends RecyclerView.ViewHolder {
-        TextView tvMessName;
+    public class MessViewHolder extends RecyclerView.ViewHolder{
+
+        private TextView tvMessId;
+        private TextView tvMessName;
 
         public MessViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            tvMessId = itemView.findViewById(R.id.tv_mess_id);
             tvMessName = itemView.findViewById(R.id.tv_mess_name);
         }
     }

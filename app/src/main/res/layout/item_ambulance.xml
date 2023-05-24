@@ -1,38 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardBackgroundColor="@color/cardBackground"
+    android:layout_margin="10dp"
+    android:padding="5dp"
+    android:elevation="4dp"
+    android:radius="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
     <TextView
         android:id="@+id/tv_ambulance_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="number"
-        android:textSize="18sp"
-        android:layout_marginBottom="5dp"/>
+        android:textSize="16sp"
+        android:padding="3dp"/>
 
     <TextView
         android:id="@+id/tv_ambulance_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:layout_marginBottom="5dp"/>
+        android:textSize="16sp"
+        android:padding="3dp"/>
+
+    <TextView
+        android:id="@+id/tv_ambulance_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:padding="3dp"/>
 
     <TextView
         android:id="@+id/tv_license_plate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:layout_marginBottom="5dp"/>
+        android:textSize="16sp"
+        android:padding="3dp"/>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btn_status"
-        android:textSize="20dp"
-        android:layout_marginLeft="5dp"
-        android:text="Status">
-    </Button>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_status"
+            android:layout_gravity="right"
+            android:textSize="20dp"
+            android:text="Status">
+        </Button>
 
-</LinearLayout>
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

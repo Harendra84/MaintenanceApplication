@@ -4,10 +4,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.gttech.maintenanceapplication.R;
 import com.gttech.maintenanceapplication.dashboard.HomeActivity;
@@ -40,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.et_password);
         btnLogin = findViewById(R.id.btn_login);
 
-       /* login button*/
+        /*Click listeners on the login buttons*/
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -50,14 +52,22 @@ public class MainActivity extends AppCompatActivity {
                 String email = etUsername.getText().toString().trim();
                 String password = etPassword.getText().toString().trim();
 
+                if (email.isEmpty()) {
+                    Toast.makeText(MainActivity.this, "Please enter username!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (password.isEmpty()) {
+                    Toast.makeText(MainActivity.this, "Please enter password!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 RequestBody requestBody = new FormBody.Builder()
-                        .add("email", email)
+                        .add("loginId", email)
                         .add("password", password)
                         .build();
 
-                /*POST*/
                 Request post = new Request.Builder()
-                        .url("http://192.168.29.43:8080/auth/login")
+                        .url("http://192.168.29.43:9090/auth/login")
                         .post(requestBody)
                         .build();
 
@@ -71,19 +81,46 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                         if (response.isSuccessful()) {
                             String responseBody = response.body().string();
-                            String username = ""; // initialize the username variable
+
+                            // initialize the username variable
+                            String username = "";
+                            String sessionId = "";
+                            String roleType = "";
                             try {
                                 JSONObject jsonObject = new JSONObject(responseBody);
-                                username = jsonObject.getString("username"); // retrieve the username from the response
+
+                                // retrieve the username from the response
+                                username = jsonObject.getString("username");
+                                sessionId = jsonObject.getString("sessionId");
+                                roleType = jsonObject.getString("roleName");
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
 
-                           /* Intent Passing*/
-                            Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-                            intent.putExtra("username", username); // pass the username as an intent extra
-                            startActivity(intent);
-                            finish();
+                            // Save user details in SharedPreferences
+                            SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("username", username);
+                            editor.putString("userId", sessionId);
+                            editor.putString("roleType", roleType);
+                            editor.apply();
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(MainActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+                                    startActivity(new Intent(MainActivity.this, HomeActivity.class));
+                                    finish();
+                                }
+                            });
+
+                        }else{
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(MainActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
                     }
                 });

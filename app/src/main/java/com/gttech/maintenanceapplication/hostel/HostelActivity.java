@@ -5,20 +5,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.gttech.maintenanceapplication.R;
-import com.gttech.maintenanceapplication.ambulance.AmbulanceActivity;
 import com.gttech.maintenanceapplication.dashboard.HomeActivity;
-import com.gttech.maintenanceapplication.feedback.AddFeedbackActivity;
-import com.gttech.maintenanceapplication.feedback.FeedbackActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -50,59 +44,18 @@ public class HostelActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hostel);
 
-        btnBack = findViewById(R.id.btn_back);
-        btnAdd = findViewById(R.id.btn_add);
         rvHostel = findViewById(R.id.rv_hostel);
-        rvHostel.setLayoutManager(new LinearLayoutManager(this));
+        btnBack = findViewById(R.id.btn_back);
 
+        rvHostel.setLayoutManager(new LinearLayoutManager(this));
         hostelList = new ArrayList<>();
-        hostelAdapter = new HostelAdapter(this, hostelList);
+        hostelAdapter = new HostelAdapter(hostelList);
         rvHostel.setAdapter(hostelAdapter);
 
-        RequestBody requestBody = new FormBody.Builder()
-                .build();
+        // Make API call to fetch mess data
+        fetchMessData();
 
-        OkHttpClient client = new OkHttpClient();
-
-        Request request = new Request.Builder()
-                .url("http://192.168.29.43:8080/hostel/getAllHostels")
-                .post(requestBody)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    String responseString = response.body().string();
-                    try {
-                        JSONArray jsonArray = new JSONArray(responseString);
-
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-                            String hostelName = jsonObject.getString("hostelName");
-
-                            Hostel hostel = new Hostel(hostelName);
-                            hostelList.add(hostel);
-                        }
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                hostelAdapter.notifyDataSetChanged();
-                            }
-                        });
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-
+        /*Back mess button click listener*/
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -111,72 +64,83 @@ public class HostelActivity extends AppCompatActivity {
             }
         });
 
-        /*Add Button*/
-        btnAdd.setOnClickListener(new View.OnClickListener() {
+    }
+
+    /*List hostel data*/
+    private void fetchMessData() {
+
+        OkHttpClient client = new OkHttpClient();
+        String url = "http://192.168.29.43:9090/hostel/getAllHostels";
+
+        RequestBody requestBody = new FormBody.Builder()
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(HostelActivity.this, AddHostelActivity.class);
-                startActivity(intent);
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(HostelActivity.this, "Failed to fetch hostel data", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        String responseData = response.body().string();
+                        JSONArray jsonArray = new JSONArray(responseData);
+
+                        // Clear the existing mess list
+                        hostelList.clear();
+
+                        for (int i = 0; i < jsonArray.length(); i++) {
+
+                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+                            String hostelId = jsonObject.getString("hostel_id");
+                            String hostelName = jsonObject.getString("hostelName");
+                            Hostel hostel = new Hostel(hostelId,hostelName);
+                            hostelList.add(hostel);
+                        }
+
+                        // Update the RecyclerView with the new mess data
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                hostelAdapter.notifyDataSetChanged();
+                            }
+                        });
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(HostelActivity.this, "Failed to parse hostel data", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }else{
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(HostelActivity.this, "Failed to featch hostel data", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
             }
         });
-
     }
 
-    /*Model Class*/
-    public class Hostel{
-        private String hostelName;
-
-        public Hostel(String hostelName) {
-            this.hostelName = hostelName;
-        }
-
-        public String getHostelName() {
-            return hostelName;
-        }
-
-        public void setHostelName(String hostelName) {
-            this.hostelName = hostelName;
-        }
-    }
-
-
-    /*Adapter Class*/
-    private static class HostelAdapter extends RecyclerView.Adapter<HostelViewHolder> {
-        private final Context context;
-        private final List<Hostel> hostelList;
-
-        public HostelAdapter(Context context, List<Hostel> hostelList) {
-            this.context = context;
-            this.hostelList = hostelList;
-        }
-
-        @NonNull
-        @Override
-        public HostelViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(context).inflate(R.layout.item_hostel, parent, false);
-            return new HostelViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull HostelViewHolder holder, int position) {
-            Hostel hostel = hostelList.get(position);
-            holder.tvHostelName.setText(hostel.getHostelName());
-        }
-
-        @Override
-        public int getItemCount() {
-            return hostelList.size();
-        }
-    }
-
-    /*View Holder Class*/
-    private static class HostelViewHolder extends RecyclerView.ViewHolder {
-
-        private final TextView tvHostelName;
-
-        public HostelViewHolder(@NonNull View itemView) {
-            super(itemView);
-            tvHostelName = itemView.findViewById(R.id.tv_hostel_name);
-        }
+    /*Dailog box*/
+    private void showAddHostelDialog() {
     }
 }

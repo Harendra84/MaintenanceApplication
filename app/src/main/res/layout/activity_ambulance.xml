@@ -39,27 +39,23 @@
             android:text="Back">
         </Button>
 
-        <Button
+       <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btn_add"
             android:textSize="20dp"
             android:layout_marginLeft="5dp"
-            android:text="Add">
+            android:text="Add Ambulance">
         </Button>
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:id="@+id/rv_ambulance"
-        android:scrollbars="vertical"/>
-
-    </LinearLayout>
+        android:scrollbars="vertical">
+    </androidx.recyclerview.widget.RecyclerView>
 
 </LinearLayout>

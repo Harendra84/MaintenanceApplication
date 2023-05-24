@@ -6,4 +6,5 @@
     <color name="colorPrimaryDark">#f29ea9</color>
     <color name="colorAccent">#49839a</color>
     <color name="colorPrimaryLight">#61AAC6</color>
+    <color name="cardBackground">#FFC0CB</color>
 </resources>

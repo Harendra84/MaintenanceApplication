@@ -1,17 +1,21 @@
 package com.gttech.maintenanceapplication.mess;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +24,7 @@ import com.gttech.maintenanceapplication.dashboard.HomeActivity;
 import com.gttech.maintenanceapplication.internship.InternshipActivity;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -29,6 +34,7 @@ import java.util.List;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -37,8 +43,8 @@ import okhttp3.Response;
 public class MessActivity extends AppCompatActivity {
 
     private RecyclerView rvMess;
-    private List<Mess> messList;
     private MessAdapter messAdapter;
+    private List<Mess> messList;
     private Button btnBack;
     private Button btnAdd;
 
@@ -52,56 +58,14 @@ public class MessActivity extends AppCompatActivity {
         btnAdd = findViewById(R.id.btn_add);
 
         rvMess.setLayoutManager(new LinearLayoutManager(this));
-
-
         messList = new ArrayList<>();
-        messAdapter = new MessAdapter(this, messList);
+        messAdapter = new MessAdapter(messList);
         rvMess.setAdapter(messAdapter);
 
-        OkHttpClient client = new OkHttpClient();
+        // Make API call to fetch mess data
+        fetchMessData();
 
-        RequestBody requestBody = new FormBody.Builder()
-                .build();
-
-        Request request = new Request.Builder()
-                .url("http://192.168.29.43:8080/mess/listOfAllMess")
-                .post(requestBody)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                String responseBody = response.body().string();
-                try {
-                    JSONArray jsonArray = new JSONArray(responseBody);
-
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-                        Integer messId = jsonObject.getInt("messId");
-                        String messName = jsonObject.getString("messName");
-
-                        Mess mess = new Mess(messId,messName);
-                        messList.add(mess);
-                    }
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            messAdapter.notifyDataSetChanged();
-                        }
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        /*Back*/
+        /*Back mess button click listener*/
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,84 +74,179 @@ public class MessActivity extends AppCompatActivity {
             }
         });
 
-        /*Add Button*/
+        /*Add mess button click listener*/
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MessActivity.this, AddMessActivity.class);
-                startActivity(intent);
+                showAddMessDialog();
             }
         });
     }
 
-    /*Model Class*/
-    public class Mess {
+    /*List mess data*/
+    private void fetchMessData() {
 
-        private int messId;
-        private String messName;
+        OkHttpClient client = new OkHttpClient();
+        String url = "http://192.168.29.43:9090/mess/listOfAllMess";
 
-        public Mess(int messId, String messName) {
-            this.messId = messId;
-            this.messName = messName;
-        }
+        RequestBody requestBody = new FormBody.Builder()
+                .build();
 
-        public int getMessId() {
-            return messId;
-        }
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
 
-        public void setMessId(int messId) {
-            this.messId = messId;
-        }
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MessActivity.this, "Failed to fetch mess data", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
 
-        public String getMessName() {
-            return messName;
-        }
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()){
+                    try {
+                        String responseData = response.body().string();
+                        JSONArray jsonArray = new JSONArray(responseData);
 
-        public void setMessName(String messName) {
-            this.messName = messName;
-        }
+                        // Clear the existing mess list
+                        messList.clear();
+
+                        // Parse the JSON data and add it to the mess list
+                        for (int i = 0; i < jsonArray.length(); i++) {
+
+                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+                            String messId = jsonObject.getString("messId");
+                            String messName = jsonObject.getString("messName");
+                            Mess mess = new Mess(messId, messName);
+                            messList.add(mess);
+                        }
+
+                        // Update the RecyclerView with the new mess data
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                messAdapter.notifyDataSetChanged();
+                            }
+                        });
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(MessActivity.this, "Failed to parse mess data", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                } else{
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MessActivity.this, "Failed to fetch mess data", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        });
     }
 
+    /*Mess alert dialog */
+    private void showAddMessDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add Mess");
 
-    /*MessAdapter*/
-    public class MessAdapter extends RecyclerView.Adapter<MessViewHolder> {
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_add_mess, null);
+        final EditText etMessName = view.findViewById(R.id.et_mess_name);
+        builder.setView(view);
 
-        private final Context context;
-        private final List<Mess> messList;
+        builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String messName = etMessName.getText().toString();
 
-        public MessAdapter(Context context, List<Mess> messList) {
-            this.context = context;
-            this.messList = messList;
-        }
+                if(!messName.isEmpty()){
+                    // Add the new mess item to the list
+                    addMess(messName);
+                }else{
+                    Toast.makeText(MessActivity.this, "Please enter valid details", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
 
-        @NonNull
-        @Override
-        public MessViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(context).inflate(R.layout.item_mess, parent, false);
-            return new MessViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull MessViewHolder holder, int position) {
-            Mess mess = messList.get(position);
-            holder.tvMessName.setText(mess.getMessName());
-
-        }
-
-        @Override
-        public int getItemCount() {
-            return messList.size();
-        }
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
-    /*View Holder Class*/
-    public class MessViewHolder extends RecyclerView.ViewHolder {
+   /*Mess add method*/
+    private void addMess(String messName) {
 
-        private final TextView tvMessName;
+        // Retrieve user data from SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
+        String sessionId = sharedPreferences.getString("sessionId", "");
+        String roleType = sharedPreferences.getString("roleType", "");
 
-        public MessViewHolder(@NonNull View itemView) {
-            super(itemView);
-            tvMessName = itemView.findViewById(R.id.tv_mess_name);
+        OkHttpClient client = new OkHttpClient();
+        String url = "http://192.168.29.43:9090/mess/addMess";
+
+        // Create JSON object for the request body
+        JSONObject requestBody = new JSONObject();
+        try {
+            requestBody.put("messName", messName);
+            requestBody.put("userId", sessionId);
+            requestBody.put("roleType", roleType);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(MessActivity.this, "Failed to create request body", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        RequestBody requestJsonBody = RequestBody.create(MediaType.parse("application/json"), requestBody.toString());
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestJsonBody)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Toast.makeText(MessActivity.this, "Failed to adding mess", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()){
+                    fetchMessData();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MessActivity.this, "Mess added successfully", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+                else{
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MessActivity.this, "Failed to add mess", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        });
     }
 }

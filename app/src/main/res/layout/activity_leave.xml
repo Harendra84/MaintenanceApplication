@@ -15,6 +15,7 @@
         android:background="@color/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -29,6 +30,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="10dp">
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -38,26 +40,24 @@
             android:text="Back">
         </Button>
 
-        <Button
+       <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btn_add"
             android:textSize="20dp"
             android:layout_marginLeft="5dp"
-            android:text="Add">
+            android:text="Add Leave">
         </Button>
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbars="vertical"
             android:layout_marginTop="10dp"
-            android:id="@+id/rv_leave"/>
-    </LinearLayout>
+            android:id="@+id/rv_leave">
+
+        </androidx.recyclerview.widget.RecyclerView>
 
 </LinearLayout>
