@@ -1,5 +1,7 @@
 package com.gttech.maintenanceapplication.feedback;
 
+import static androidx.constraintlayout.widget.ConstraintLayoutStates.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -114,6 +117,8 @@ public class FeedbackActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                if (response.isSuccessful()){
+                   int feedId = 0;
+                   String feed = " ";
                    try {
                        String responseData = response.body().string();
                        JSONArray jsonArray = new JSONArray(responseData);
@@ -125,8 +130,8 @@ public class FeedbackActivity extends AppCompatActivity {
                        for (int i = 0; i < jsonArray.length(); i++) {
 
                            JSONObject jsonObject = jsonArray.getJSONObject(i);
-                           String feedId = jsonObject.getString("feedbackId");
-                           String feed = jsonObject.getString("feedback");
+                           feedId = jsonObject.getInt("feedbackId");
+                           feed = jsonObject.getString("feedback");
                            Feedback  feedback =  new Feedback(feedId, feed);
                            feedbackList.add(feedback);
                        }
@@ -145,6 +150,11 @@ public class FeedbackActivity extends AppCompatActivity {
                            }
                        });
                    }
+                   // Save feed id details in SharedPreferences
+                   SharedPreferences sharedPreferences = getSharedPreferences("FeedbackData", MODE_PRIVATE);
+                   SharedPreferences.Editor editor = sharedPreferences.edit();
+                   editor.putInt("feedbackId", feedId);
+                   editor.apply();
                }else{
                    runOnUiThread(new Runnable() {
                        @Override
@@ -195,33 +205,29 @@ public class FeedbackActivity extends AppCompatActivity {
 
         // Retrieve user data from SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
-        String userId = sharedPreferences.getString("userId", "");
-        String roleType = sharedPreferences.getString("roleType", "");
+        String userId = sharedPreferences.getString("sessionId", "");
+        SharedPreferences mess = getSharedPreferences("MessData", MODE_PRIVATE);
+        int messId = mess.getInt("messId", 0);
+        Log.d(TAG, "onResponse: " + messId);
+
+        // Hard-coded ID value
+        int feedbackId = 0; // Replace with your desired ID value
 
         OkHttpClient client = new OkHttpClient();
+
         String url = "http://192.168.29.43:9090/feedback/addOrEditFeedback";
 
-        // Create JSON object for the request body
-        JSONObject requestBody = new JSONObject();
-        try {
-            requestBody.put("feedback", feedback);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Toast.makeText(FeedbackActivity.this, "Failed to create request body", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        RequestBody requestJsonBody = RequestBody.create(MediaType.parse("application/json"), requestBody.toString());
-
-        // Add userId and roleType as a query parameter in the URL
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(url).newBuilder();
-        urlBuilder.addQueryParameter("userId",userId);
-        urlBuilder.addQueryParameter("roleType",roleType);
-        String updateUrl = urlBuilder.build().toString();
+        // Create the form body with mess data and other parameters
+        RequestBody requestBody = new FormBody.Builder()
+                .add("feedback", feedback)
+                .add("userId", userId)
+                //.add("messId", messId)
+                //.add("feedbackId", feedbackId)
+                .build();
 
         Request request = new Request.Builder()
-                .url(updateUrl)
-                .post(requestJsonBody)
+                .url(url)
+                .post(requestBody)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {

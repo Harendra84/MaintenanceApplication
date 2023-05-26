@@ -31,7 +31,7 @@ public class MessAdapter extends RecyclerView.Adapter<MessAdapter.MessViewHolder
     @Override
     public void onBindViewHolder(@NonNull MessViewHolder holder, int position) {
         Mess mess = messList.get(position);
-        holder.tvMessId.setText(mess.getMessId());
+        holder.tvMessId.setInputType(mess.getMessId());
         holder.tvMessName.setText(mess.getMessName());
 
     }

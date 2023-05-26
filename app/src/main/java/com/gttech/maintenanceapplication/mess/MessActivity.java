@@ -1,5 +1,7 @@
 package com.gttech.maintenanceapplication.mess;
 
+import static androidx.constraintlayout.widget.ConstraintLayoutStates.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +49,7 @@ public class MessActivity extends AppCompatActivity {
     private MessAdapter messAdapter;
     private List<Mess> messList;
     private Button btnBack;
-    private Button btnAdd;
+    //private Button btnAdd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +58,7 @@ public class MessActivity extends AppCompatActivity {
 
         rvMess = findViewById(R.id.rv_mess);
         btnBack = findViewById(R.id.btn_back);
-        btnAdd = findViewById(R.id.btn_add);
+        //btnAdd = findViewById(R.id.btn_add);
 
         rvMess.setLayoutManager(new LinearLayoutManager(this));
         messList = new ArrayList<>();
@@ -75,12 +78,12 @@ public class MessActivity extends AppCompatActivity {
         });
 
         /*Add mess button click listener*/
-        btnAdd.setOnClickListener(new View.OnClickListener() {
+       /* btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showAddMessDialog();
             }
-        });
+        });*/
     }
 
     /*List mess data*/
@@ -112,6 +115,8 @@ public class MessActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.isSuccessful()){
+                    int messId = 0;
+                    String messName = "";
                     try {
                         String responseData = response.body().string();
                         JSONArray jsonArray = new JSONArray(responseData);
@@ -123,8 +128,9 @@ public class MessActivity extends AppCompatActivity {
                         for (int i = 0; i < jsonArray.length(); i++) {
 
                             JSONObject jsonObject = jsonArray.getJSONObject(i);
-                            String messId = jsonObject.getString("messId");
-                            String messName = jsonObject.getString("messName");
+                            messId = jsonObject.getInt("messId");
+                            Log.d(TAG, "onResponse: "+messId);
+                            messName = jsonObject.getString("messName");
                             Mess mess = new Mess(messId, messName);
                             messList.add(mess);
                         }
@@ -146,6 +152,12 @@ public class MessActivity extends AppCompatActivity {
                             }
                         });
                     }
+                    // Save mess id details in SharedPreferences
+                    SharedPreferences sharedPreferences = getSharedPreferences("MessData", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putInt("messId", messId);
+                    editor.apply();
+
                 } else{
                     runOnUiThread(new Runnable() {
                         @Override
@@ -159,7 +171,7 @@ public class MessActivity extends AppCompatActivity {
     }
 
     /*Mess alert dialog */
-    private void showAddMessDialog() {
+    /*private void showAddMessDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Add Mess");
 
@@ -189,10 +201,10 @@ public class MessActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
         dialog.show();
-    }
+    }*/
 
    /*Mess add method*/
-    private void addMess(String messName) {
+    /*private void addMess(String messName) {
 
         // Retrieve user data from SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
@@ -247,6 +259,5 @@ public class MessActivity extends AppCompatActivity {
                     });
                 }
             }
-        });
-    }
+        });*/
 }

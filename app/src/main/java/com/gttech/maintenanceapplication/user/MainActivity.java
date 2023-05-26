@@ -18,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 OkHttpClient client = new OkHttpClient();
+                String url = "http://192.168.29.43:9090/auth/login";
 
                 String email = etUsername.getText().toString().trim();
                 String password = etPassword.getText().toString().trim();
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
                         .build();
 
                 Request post = new Request.Builder()
-                        .url("http://192.168.29.43:9090/auth/login")
+                        .url(url)
                         .post(requestBody)
                         .build();
 
@@ -80,21 +82,28 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                         if (response.isSuccessful()) {
-                            String responseBody = response.body().string();
 
                             // initialize the username variable
                             String username = "";
                             String sessionId = "";
                             String roleType = "";
                             try {
+                                String responseBody = response.body().string();
                                 JSONObject jsonObject = new JSONObject(responseBody);
 
                                 // retrieve the username from the response
                                 username = jsonObject.getString("username");
                                 sessionId = jsonObject.getString("sessionId");
                                 roleType = jsonObject.getString("roleName");
+
                             } catch (JSONException e) {
                                 e.printStackTrace();
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(MainActivity.this, "Failed to featch login", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                             }
 
                             // Save user details in SharedPreferences
