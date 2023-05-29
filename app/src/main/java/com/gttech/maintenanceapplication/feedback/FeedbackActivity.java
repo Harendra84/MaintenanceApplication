@@ -118,7 +118,7 @@ public class FeedbackActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                if (response.isSuccessful()){
                    int feedId = 0;
-                   String feed = " ";
+                   String feed = "";
                    try {
                        String responseData = response.body().string();
                        JSONArray jsonArray = new JSONArray(responseData);
@@ -204,25 +204,21 @@ public class FeedbackActivity extends AppCompatActivity {
     private void addFeedback(String feedback) {
 
         // Retrieve user data from SharedPreferences
+        SharedPreferences feedbacks = getSharedPreferences("FeedbackData", MODE_PRIVATE);
+        int feedbackId = feedbacks.getInt("feedbackId", 0);
         SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
-        String userId = sharedPreferences.getString("sessionId", "");
+        String userId = sharedPreferences.getString("userId", "");
         SharedPreferences mess = getSharedPreferences("MessData", MODE_PRIVATE);
         int messId = mess.getInt("messId", 0);
-        Log.d(TAG, "onResponse: " + messId);
-
-        // Hard-coded ID value
-        int feedbackId = 0; // Replace with your desired ID value
 
         OkHttpClient client = new OkHttpClient();
-
         String url = "http://192.168.29.43:9090/feedback/addOrEditFeedback";
 
-        // Create the form body with mess data and other parameters
         RequestBody requestBody = new FormBody.Builder()
+                .add("feedbackId", "0")
                 .add("feedback", feedback)
+                .add("messId", String.valueOf(messId))
                 .add("userId", userId)
-                //.add("messId", messId)
-                //.add("feedbackId", feedbackId)
                 .build();
 
         Request request = new Request.Builder()

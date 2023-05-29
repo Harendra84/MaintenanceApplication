@@ -206,37 +206,32 @@ public class LeaveActivity extends AppCompatActivity {
 
     /*Add leave method*/
     private void addLeave(String leaveType, String leaveReason, String parentName, String parentNumber) {
+
+
         // Retrieve user data from SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
         String userId = sharedPreferences.getString("userId", "");
         String roleType = sharedPreferences.getString("roleType", "");
+        SharedPreferences hostel = getSharedPreferences("HostelData", MODE_PRIVATE);
+        int hostelId = hostel.getInt("hostel_id", 0);
 
         OkHttpClient client = new OkHttpClient();
         String url = "http://192.168.29.43:9090/leave/addOrEditLeave";
 
-
-        // Create JSON object for the request body
-        JSONObject requestBody = new JSONObject();
-        try {
-            requestBody.put("ambulanceName", leaveType);
-            requestBody.put("licensePlate", leaveReason);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Toast.makeText(LeaveActivity.this, "Failed to create request body", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        RequestBody requestJsonBody = RequestBody.create(MediaType.parse("application/json"), requestBody.toString());
-
-        // Add userId and roleType as a query parameter in the URL
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(url).newBuilder();
-        urlBuilder.addQueryParameter("userId",userId);
-        urlBuilder.addQueryParameter("roleType",roleType);
-        String updateUrl = urlBuilder.build().toString();
+        RequestBody requestBody = new FormBody.Builder()
+                .add("leaveId", "0")
+                .add("leaveTypeId", leaveType)
+                .add("reason", leaveReason)
+                .add("parentName", parentName)
+                .add("parentPhoneNo", parentNumber)
+                .add("hostelId", String.valueOf(hostelId))
+                .add("userId", userId)
+                .add("roleType", roleType)
+                .build();
 
         Request request = new Request.Builder()
-                .url(updateUrl)
-                .post(requestJsonBody)
+                .url(url)
+                .post(requestBody)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {

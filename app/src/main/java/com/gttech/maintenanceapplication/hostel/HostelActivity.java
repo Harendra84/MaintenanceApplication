@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -95,6 +96,8 @@ public class HostelActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.isSuccessful()) {
+                    int hostelId = 0;
+                    String hostelName ="";
                     try {
                         String responseData = response.body().string();
                         JSONArray jsonArray = new JSONArray(responseData);
@@ -105,8 +108,8 @@ public class HostelActivity extends AppCompatActivity {
                         for (int i = 0; i < jsonArray.length(); i++) {
 
                             JSONObject jsonObject = jsonArray.getJSONObject(i);
-                            String hostelId = jsonObject.getString("hostel_id");
-                            String hostelName = jsonObject.getString("hostelName");
+                            hostelId = jsonObject.getInt("hostel_id");
+                            hostelName = jsonObject.getString("hostelName");
                             Hostel hostel = new Hostel(hostelId,hostelName);
                             hostelList.add(hostel);
                         }
@@ -128,6 +131,11 @@ public class HostelActivity extends AppCompatActivity {
                             }
                         });
                     }
+                    // Save feed id details in SharedPreferences
+                    SharedPreferences sharedPreferences = getSharedPreferences("HostelData", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putInt("hostel_id", hostelId);
+                    editor.apply();
                 }else{
                     runOnUiThread(new Runnable() {
                         @Override

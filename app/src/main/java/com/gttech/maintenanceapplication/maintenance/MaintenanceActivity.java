@@ -201,6 +201,8 @@ public class MaintenanceActivity extends AppCompatActivity {
     private void addMaintenance(String maintenanceType, String description) {
 
         // Retrieve user data from SharedPreferences
+        SharedPreferences hostel = getSharedPreferences("HostelData", MODE_PRIVATE);
+        int hostelId = hostel.getInt("hostel_id", 0);
         SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
         String userId = sharedPreferences.getString("userId", "");
         String roleType = sharedPreferences.getString("roleType", "");
@@ -209,28 +211,18 @@ public class MaintenanceActivity extends AppCompatActivity {
         String url = "http://192.168.29.43:9090/maintenance/addOrEditMaintenanceDetails";
 
 
-        // Create JSON object for the request body
-        JSONObject requestBody = new JSONObject();
-        try {
-            requestBody.put("maintenanceType", maintenanceType);
-            requestBody.put("description", description);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Toast.makeText(MaintenanceActivity.this, "Failed to create request body", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        RequestBody requestJsonBody = RequestBody.create(MediaType.parse("application/json"), requestBody.toString());
-
-        // Add userId and roleType as a query parameter in the URL
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(url).newBuilder();
-        urlBuilder.addQueryParameter("userId",userId);
-        urlBuilder.addQueryParameter("roleType",roleType);
-        String updateUrl = urlBuilder.build().toString();
+        RequestBody requestBody = new FormBody.Builder()
+                .add("maintenanceId", "0")
+                .add("maintenanceType", maintenanceType)
+                .add("description", description)
+                .add("hostelName", String.valueOf(hostelId))
+                .add("userId", userId)
+                .add("roleType", roleType)
+                .build();
 
         Request request = new Request.Builder()
-                .url(updateUrl)
-                .post(requestJsonBody)
+                .url(url)
+                .post(requestBody)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {

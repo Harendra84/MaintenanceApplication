@@ -1,22 +1,22 @@
 package com.gttech.maintenanceapplication.mess;
 public class Mess {
 
-    private int messId;
+    private Integer messId;
     private String messName;
 
     public Mess() {
     }
 
-    public Mess(int messId, String messName) {
+    public Mess(Integer messId, String messName) {
         this.messId = messId;
         this.messName = messName;
     }
 
-    public int getMessId() {
+    public Integer getMessId() {
         return messId;
     }
 
-    public void setMessId(int messId) {
+    public void setMessId(Integer messId) {
         this.messId = messId;
     }
 

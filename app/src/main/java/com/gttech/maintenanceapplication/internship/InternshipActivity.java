@@ -180,13 +180,14 @@ public class InternshipActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 String name = etInternshipName.getText().toString();
                 String registration = etRegistrationNumber.getText().toString();
-                String purpose = etPurpose.getText().toString();
                 String emailId = etEmailId.getText().toString();
+                String phoneNo = etPhoneNumber.getText().toString();
+                String purpose = etPurpose.getText().toString();
                 String noOfDays = etNoOfDays.getText().toString();
 
-                if (!name.isEmpty() || !registration.isEmpty() || !purpose.isEmpty() || !emailId.isEmpty() || !noOfDays.isEmpty()){
+                if (!name.isEmpty() || !registration.isEmpty() || !phoneNo.isEmpty() || !purpose.isEmpty() || !emailId.isEmpty() || !noOfDays.isEmpty()){
                     // Add the new mess item to the list
-                    addInternship(name, registration, purpose, emailId, noOfDays);
+                    addInternship(name, registration, phoneNo, purpose, emailId, Integer.parseInt(noOfDays));
                 }else{
                     Toast.makeText(InternshipActivity.this, "Please enter valid details", Toast.LENGTH_SHORT).show();
                 }
@@ -204,39 +205,37 @@ public class InternshipActivity extends AppCompatActivity {
     }
 
     /*Internship add method*/
-    private void addInternship(String name, String registration, String purpose, String emailId, String noOfDays) {
+    private void addInternship(String name, String registrationNumber, String phoneNo, String purpose, String emailId, int noOfDays) {
 
         // Retrieve user data from SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
         String userId = sharedPreferences.getString("userId", "");
         String roleType = sharedPreferences.getString("roleType", "");
+        SharedPreferences hostel = getSharedPreferences("HostelData", MODE_PRIVATE);
+        int hostelId = hostel.getInt("hostel_id", 0);
+        SharedPreferences mess = getSharedPreferences("MessData", MODE_PRIVATE);
+        int messId = mess.getInt("messId", 0);
 
         OkHttpClient client = new OkHttpClient();
         String url = "http://192.168.29.43:9090/internship/addOrEditInternship";
 
-
-        // Create JSON object for the request body
-        JSONObject requestBody = new JSONObject();
-        try {
-            requestBody.put("ambulanceName", name);
-            requestBody.put("licensePlate", registration);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Toast.makeText(InternshipActivity.this, "Failed to create request body", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        RequestBody requestJsonBody = RequestBody.create(MediaType.parse("application/json"), requestBody.toString());
-
-        // Add userId and roleType as a query parameter in the URL
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(url).newBuilder();
-        urlBuilder.addQueryParameter("userId",userId);
-        urlBuilder.addQueryParameter("roleType",roleType);
-        String updateUrl = urlBuilder.build().toString();
+        RequestBody requestBody = new FormBody.Builder()
+                .add("internshipId", "0")
+                .add("name", name)
+                .add("registrationNo", registrationNumber)
+                .add("emailId", emailId)
+                .add("phoneNo", phoneNo)
+                .add("purpose", purpose)
+                .add("noOfDays", String.valueOf(noOfDays))
+                .add("hostelId", String.valueOf(hostelId))
+                .add("messId", String.valueOf(messId))
+                .add("userId", userId)
+                .add("roleType", roleType)
+                .build();
 
         Request request = new Request.Builder()
-                .url(updateUrl)
-                .post(requestJsonBody)
+                .url(url)
+                .post(requestBody)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -254,7 +253,7 @@ public class InternshipActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.isSuccessful()){
-                    fetchInternshipData();
+                    //fetchInternshipData();
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
