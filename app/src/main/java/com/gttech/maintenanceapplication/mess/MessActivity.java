@@ -5,6 +5,7 @@ import static androidx.constraintlayout.widget.ConstraintLayoutStates.TAG;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,6 +16,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -48,7 +50,7 @@ public class MessActivity extends AppCompatActivity {
     private RecyclerView rvMess;
     private MessAdapter messAdapter;
     private List<Mess> messList;
-    private Button btnBack;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +58,11 @@ public class MessActivity extends AppCompatActivity {
         setContentView(R.layout.activity_mess);
 
         rvMess = findViewById(R.id.rv_mess);
-        btnBack = findViewById(R.id.btn_back);
+        toolbar = findViewById(R.id.toolbars);
+        setSupportActionBar(toolbar);
+
+        // Enable the back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         rvMess.setLayoutManager(new LinearLayoutManager(this));
         messList = new ArrayList<>();
@@ -65,22 +71,31 @@ public class MessActivity extends AppCompatActivity {
 
         // Make API call to fetch mess data
         fetchMessData();
+    }
 
-        /*Back mess button click listener*/
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MessActivity.this, HomeActivity.class);
-                startActivity(intent);
-            }
-        });
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Handle the back button click
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Handle the back button press
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     /*List mess data*/
     private void fetchMessData() {
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.29.43:9090/mess/listOfAllMess";
+        String url = "http://192.168.43.43:9090/mess/listOfAllMess";
 
         RequestBody requestBody = new FormBody.Builder()
                 .build();

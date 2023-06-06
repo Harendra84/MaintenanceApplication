@@ -5,6 +5,7 @@ import static androidx.constraintlayout.widget.ConstraintLayoutStates.TAG;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,12 +16,14 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 import com.gttech.maintenanceapplication.R;
 import com.gttech.maintenanceapplication.ambulance.AmbulanceActivity;
@@ -50,7 +53,7 @@ public class FeedbackActivity extends AppCompatActivity {
     private RecyclerView rvFeedback;
     private List<Feedback> feedbackList;
     private FeedbackAdapter feedbackAdapter;
-    private Button btnBack;
+    private Toolbar toolbar;
     private Button btnAdd;
 
     @Override
@@ -59,7 +62,7 @@ public class FeedbackActivity extends AppCompatActivity {
         setContentView(R.layout.activity_feedback);
 
         rvFeedback = findViewById(R.id.rv_feedback);
-        btnBack = findViewById(R.id.btn_back);
+        toolbar = findViewById(R.id.toolbars);
         btnAdd = findViewById(R.id.btn_add);
 
         rvFeedback.setLayoutManager(new LinearLayoutManager(this));
@@ -71,13 +74,10 @@ public class FeedbackActivity extends AppCompatActivity {
         fetchFeedbackData();
 
         /*Back to feedback*/
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(FeedbackActivity.this, HomeActivity.class);
-                startActivity(intent);
-            }
-        });
+        setSupportActionBar(toolbar);
+
+        // Enable the back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         /*Add Feedback*/
         btnAdd.setOnClickListener(new View.OnClickListener() {
@@ -87,12 +87,29 @@ public class FeedbackActivity extends AppCompatActivity {
             }
         });
     }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Handle the back button click
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Handle the back button press
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
+        finish();
+    }
 
     /*List feedback data*/
     private void fetchFeedbackData() {
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.29.43:9090/feedback/listOfFeedbacks";
+        String url = "http://192.168.43.43:9090/feedback/listOfFeedbacks";
 
         RequestBody requestBody = new FormBody.Builder()
                 .build();
@@ -212,7 +229,7 @@ public class FeedbackActivity extends AppCompatActivity {
         int messId = mess.getInt("messId", 0);
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.29.43:9090/feedback/addOrEditFeedback";
+        String url = "http://192.168.43.43:9090/feedback/addOrEditFeedback";
 
         RequestBody requestBody = new FormBody.Builder()
                 .add("feedbackId", "0")

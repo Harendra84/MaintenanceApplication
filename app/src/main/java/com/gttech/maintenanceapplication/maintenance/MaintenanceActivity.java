@@ -3,6 +3,7 @@ package com.gttech.maintenanceapplication.maintenance;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -12,6 +13,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,8 +32,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -48,7 +54,7 @@ public class MaintenanceActivity extends AppCompatActivity {
     private RecyclerView rvMaintenance;
     private MaintenanceAdapter maintenanceAdapter;
     private List<Maintenance> maintenanceList;
-    private Button btnBack;
+    private Toolbar toolbar;
     private Button btnAdd;
 
     @Override
@@ -57,7 +63,11 @@ public class MaintenanceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_maintenance);
 
         rvMaintenance = findViewById(R.id.rv_maintenance);
-        btnBack = findViewById(R.id.btn_back);
+        toolbar = findViewById(R.id.toolbars);
+        setSupportActionBar(toolbar);
+
+        // Enable the back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         btnAdd = findViewById(R.id.btn_add);
 
         rvMaintenance.setLayoutManager(new LinearLayoutManager(this));
@@ -68,14 +78,6 @@ public class MaintenanceActivity extends AppCompatActivity {
         // Make API call to fetch mess data
         fetchMaintenanceData();
 
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MaintenanceActivity.this, HomeActivity.class);
-                startActivity(intent);
-            }
-        });
-
         /*Add maintenance button click listener*/
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,11 +87,29 @@ public class MaintenanceActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Handle the back button click
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Handle the back button press
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
     /*List maintenance data*/
     private void fetchMaintenanceData() {
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.29.43:9090/maintenance/listOfMaintenanceData";
+        String url = "http://192.168.43.43:9090/maintenance/listOfMaintenanceData";
 
         RequestBody requestBody = new FormBody.Builder()
                 .build();
@@ -129,7 +149,8 @@ public class MaintenanceActivity extends AppCompatActivity {
                             String maintenanceType = jsonObject.getString("maintenanceType");
                             String maintenanceStatus = jsonObject.getString("maintenanceStatus");
                             String maintenanceDescription = jsonObject.getString("description");
-                            Maintenance maintenance = new Maintenance(maintenanceId,maintenanceType,maintenanceStatus,maintenanceDescription);
+                            String date = jsonObject.getString("date");
+                            Maintenance maintenance = new Maintenance(maintenanceId,maintenanceType,maintenanceStatus,maintenanceDescription,date);
                             maintenanceList.add(maintenance);
                         }
 
@@ -205,17 +226,18 @@ public class MaintenanceActivity extends AppCompatActivity {
         int hostelId = hostel.getInt("hostel_id", 0);
         SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
         String userId = sharedPreferences.getString("userId", "");
+        String username = sharedPreferences.getString("username", "");
         String roleType = sharedPreferences.getString("roleType", "");
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.29.43:9090/maintenance/addOrEditMaintenanceDetails";
-
+        String url = "http://192.168.43.43:9090/maintenance/addOrEditMaintenanceDetails";
 
         RequestBody requestBody = new FormBody.Builder()
                 .add("maintenanceId", "0")
                 .add("maintenanceType", maintenanceType)
                 .add("description", description)
                 .add("hostelName", String.valueOf(hostelId))
+                .add("userName", username)
                 .add("userId", userId)
                 .add("roleType", roleType)
                 .build();
@@ -244,7 +266,7 @@ public class MaintenanceActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(MaintenanceActivity.this, "maintenance added successfully", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MaintenanceActivity.this, "Maintenance added successfully", Toast.LENGTH_SHORT).show();
                         }
                     });
                 }else{

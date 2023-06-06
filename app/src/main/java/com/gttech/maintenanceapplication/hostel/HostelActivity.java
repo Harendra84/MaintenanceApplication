@@ -2,12 +2,14 @@ package com.gttech.maintenanceapplication.hostel;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -37,7 +39,7 @@ public class HostelActivity extends AppCompatActivity {
     private RecyclerView rvHostel;
     private List<Hostel> hostelList;
     private HostelAdapter hostelAdapter;
-    private Button btnBack;
+    private Toolbar toolbar;
     private Button btnAdd;
 
     @Override
@@ -46,7 +48,12 @@ public class HostelActivity extends AppCompatActivity {
         setContentView(R.layout.activity_hostel);
 
         rvHostel = findViewById(R.id.rv_hostel);
-        btnBack = findViewById(R.id.btn_back);
+        toolbar = findViewById(R.id.toolbars);
+        toolbar = findViewById(R.id.toolbars);
+        setSupportActionBar(toolbar);
+
+        // Enable the back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         rvHostel.setLayoutManager(new LinearLayoutManager(this));
         hostelList = new ArrayList<>();
@@ -56,22 +63,30 @@ public class HostelActivity extends AppCompatActivity {
         // Make API call to fetch mess data
         fetchMessData();
 
-        /*Back mess button click listener*/
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(HostelActivity.this, HomeActivity.class);
-                startActivity(intent);
-            }
-        });
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Handle the back button click
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
+    @Override
+    public void onBackPressed() {
+        // Handle the back button press
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     /*List hostel data*/
     private void fetchMessData() {
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.29.43:9090/hostel/getAllHostels";
+        String url = "http://192.168.43.43:9090/hostel/getAllHostels";
 
         RequestBody requestBody = new FormBody.Builder()
                 .build();

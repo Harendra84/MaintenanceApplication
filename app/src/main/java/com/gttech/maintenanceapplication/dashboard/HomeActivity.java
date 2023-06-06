@@ -1,12 +1,14 @@
 package com.gttech.maintenanceapplication.dashboard;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.gttech.maintenanceapplication.feedback.FeedbackActivity;
@@ -23,15 +25,8 @@ import com.gttech.maintenanceapplication.R;
 public class HomeActivity extends AppCompatActivity{
 
     private TextView tvUsername;
-    private Button btnLogout;
-    private Button btnHostelAttendance;
-    private Button btnMess;
-    private Button btnMaintenance;
-    private Button btnLeave;
-    private Button btnInternship;
-    private Button btnAmbulance;
-    private Button btnFeedback;
-    private Button btnHostel;
+    private ImageView logout;
+    private CardView hostelAttendance, mess, maintenance, leave, internship, ambulance, feedback, hostel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,25 +34,25 @@ public class HomeActivity extends AppCompatActivity{
         setContentView(R.layout.activity_home);
 
         tvUsername = findViewById(R.id.tv_username);
-        btnLogout = findViewById(R.id.btn_logout);
-        btnHostelAttendance = findViewById(R.id.btn_hostel_attendance);
-        btnMess = findViewById(R.id.btn_mess);
-        btnMaintenance = findViewById(R.id.btn_maintenance);
-        btnLeave = findViewById(R.id.btn_leave);
-        btnInternship = findViewById(R.id.btn_internship);
-        btnAmbulance = findViewById(R.id.btn_ambulance);
-        btnFeedback = findViewById(R.id.btn_feedback);
-        btnHostel = findViewById(R.id.btn_hostel);
+        logout = findViewById(R.id.logout);
+        hostelAttendance = findViewById(R.id.hostel_attendance);
+        mess = findViewById(R.id.mess);
+        maintenance = findViewById(R.id.maintenance);
+        leave = findViewById(R.id.leave);
+        internship = findViewById(R.id.internship);
+        ambulance = findViewById(R.id.ambulance);
+        feedback = findViewById(R.id.feedback);
+        hostel = findViewById(R.id.hostel);
 
         // Retrieve user data from SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
         String username = sharedPreferences.getString("username", "");
-        String userId = sharedPreferences.getString("sessionId", "");
+        String userId = sharedPreferences.getString("userId", "");
         String roleType = sharedPreferences.getString("roleType", "");
         tvUsername.setText("Welcome, " + username + "!");
 
         /*Click listeners on the logout buttons*/
-        btnLogout.setOnClickListener(new View.OnClickListener() {
+        logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -70,7 +65,7 @@ public class HomeActivity extends AppCompatActivity{
             }
         });
 
-        btnHostelAttendance.setOnClickListener(new View.OnClickListener() {
+        hostelAttendance.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(HomeActivity.this, HostelAttendanceActivity.class);
@@ -78,7 +73,7 @@ public class HomeActivity extends AppCompatActivity{
             }
         });
 
-        btnMess.setOnClickListener(new View.OnClickListener() {
+        mess.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(HomeActivity.this, MessActivity.class);
@@ -86,7 +81,7 @@ public class HomeActivity extends AppCompatActivity{
             }
         });
 
-        btnMaintenance.setOnClickListener(new View.OnClickListener() {
+        maintenance.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(HomeActivity.this, MaintenanceActivity.class);
@@ -94,7 +89,7 @@ public class HomeActivity extends AppCompatActivity{
             }
         });
 
-        btnLeave.setOnClickListener(new View.OnClickListener() {
+        leave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(HomeActivity.this, LeaveActivity.class);
@@ -102,7 +97,7 @@ public class HomeActivity extends AppCompatActivity{
             }
         });
 
-        btnInternship.setOnClickListener(new View.OnClickListener() {
+        internship.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(HomeActivity.this, InternshipActivity.class);
@@ -110,7 +105,7 @@ public class HomeActivity extends AppCompatActivity{
             }
         });
 
-        btnAmbulance.setOnClickListener(new View.OnClickListener() {
+        ambulance.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(HomeActivity.this, AmbulanceActivity.class);
@@ -118,7 +113,7 @@ public class HomeActivity extends AppCompatActivity{
             }
         });
 
-        btnFeedback.setOnClickListener(new View.OnClickListener() {
+        feedback.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(HomeActivity.this, FeedbackActivity.class);
@@ -126,7 +121,7 @@ public class HomeActivity extends AppCompatActivity{
             }
         });
 
-        btnHostel.setOnClickListener(new View.OnClickListener() {
+        hostel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(HomeActivity.this, HostelActivity.class);

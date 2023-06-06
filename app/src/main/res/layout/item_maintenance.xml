@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardBackgroundColor="@color/cardBackground"
+    app:cardBackgroundColor="@color/cardViewColor"
     android:layout_margin="10dp"
     android:padding="5dp"
     android:elevation="4dp"
@@ -40,15 +40,12 @@
         android:layout_height="wrap_content"
         android:textSize="16sp"
         android:padding="3dp"/>
-
-    <Button
+    <TextView
+        android:id="@+id/tv_maintenance_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btn_status"
-        android:layout_gravity="right"
-        android:textSize="20dp"
-        android:text="Status">
-    </Button>
+        android:textSize="16sp"
+        android:padding="3dp"/>
 
 </LinearLayout>
 

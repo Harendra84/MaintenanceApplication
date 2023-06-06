@@ -1,8 +1,11 @@
 package com.gttech.maintenanceapplication.leave;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -10,7 +13,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -47,7 +52,7 @@ public class LeaveActivity extends AppCompatActivity {
     private RecyclerView rvLeave;
     private LeaveAdapter leaveAdapter;
     private List<Leave> leaveList;
-    private Button btnBack;
+    private Toolbar toolbar;
     private Button btnAdd;
 
     @Override
@@ -56,7 +61,11 @@ public class LeaveActivity extends AppCompatActivity {
         setContentView(R.layout.activity_leave);
 
         rvLeave = findViewById(R.id.rv_leave);
-        btnBack = findViewById(R.id.btn_back);
+        toolbar = findViewById(R.id.toolbars);
+        setSupportActionBar(toolbar);
+
+        // Enable the back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         btnAdd = findViewById(R.id.btn_add);
 
         rvLeave.setLayoutManager(new LinearLayoutManager(this));
@@ -67,15 +76,6 @@ public class LeaveActivity extends AppCompatActivity {
         // Make API call to fetch mess data
         fetchLeaveData();
 
-        /*Buck internship */
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(LeaveActivity.this, HomeActivity.class);
-                startActivity(intent);
-            }
-        });
-
         /*Add internship*/
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,14 +85,38 @@ public class LeaveActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Handle the back button click
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Handle the back button press
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
     /*List leave data*/
     private void fetchLeaveData() {
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.29.43:9090/leave/listOfLeavesByStudent";
+        String url = "http://192.168.43.43:9090/leave/listOfLeavesByStudent";
+
+        // Retrieve user data from SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
+        String userId = sharedPreferences.getString("userId", "");
+        Log.d(TAG, "fetchLeaveData: "+ userId);
+        String roleType = sharedPreferences.getString("roleType", "");
 
         RequestBody requestBody = new FormBody.Builder()
-                .add("userId", "4")
-                .add("roleType", "STUDENT")
+                .add("userId", userId)
+                .add("roleType", roleType)
                 .build();
 
         Request request = new Request.Builder()
@@ -126,7 +150,7 @@ public class LeaveActivity extends AppCompatActivity {
                         for (int i = 0; i < jsonArray.length(); i++) {
 
                             JSONObject jsonObject = jsonArray.getJSONObject(i);
-                            String leaveId = jsonObject.getString("leaveId");
+                            int leaveId = jsonObject.getInt("leaveId");
                             String leaveType = jsonObject.getString("leaveType");
                             String status = jsonObject.getString("status");
                             String reason = jsonObject.getString("reason");
@@ -168,10 +192,10 @@ public class LeaveActivity extends AppCompatActivity {
     /*Leave alert dialog */
     private void showAddLeaveDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Add Ambulance");
+        builder.setTitle("Add Leave");
 
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_add_leave, null);
-        final EditText etLeaveType = view.findViewById(R.id.et_leave_type);
+        final EditText etLeaveType = view.findViewById(R.id.et_leave_type_id);
         final EditText etLeaveReason = view.findViewById(R.id.et_reason);
         final EditText etParentName = view.findViewById(R.id.et_parent_name);
         final EditText etParentNumber = view.findViewById(R.id.et_parent_number);
@@ -216,7 +240,7 @@ public class LeaveActivity extends AppCompatActivity {
         int hostelId = hostel.getInt("hostel_id", 0);
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.29.43:9090/leave/addOrEditLeave";
+        String url = "http://192.168.43.43:9090/leave/addOrEditLeave";
 
         RequestBody requestBody = new FormBody.Builder()
                 .add("leaveId", "0")

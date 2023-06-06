@@ -27,21 +27,23 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="5dp"
         android:gravity="center">
 
-        <Button
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbars"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/btn_back"
-            android:textSize="20dp"
-            android:layout_marginLeft="5dp"
-            android:text="Back">
-        </Button>
+            android:layout_marginTop="5dp"
+            android:background="@color/colorPrimary"
+            android:elevation="4dp"
+            app:title="Home"
+            app:navigationIcon="@drawable/ic_arrow_back_24">
+        </androidx.appcompat.widget.Toolbar>
 
     </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
+
+    <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbars="vertical"
