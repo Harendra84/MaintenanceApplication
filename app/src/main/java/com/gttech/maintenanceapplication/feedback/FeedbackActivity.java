@@ -48,13 +48,12 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class FeedbackActivity extends AppCompatActivity {
+public class FeedbackActivity extends AppCompatActivity implements FeedbackAdapter.FeedbackItemClickListener{
 
     private RecyclerView rvFeedback;
     private List<Feedback> feedbackList;
     private FeedbackAdapter feedbackAdapter;
-    private Toolbar toolbar;
-    private Button btnAdd;
+    private Toolbar toolbarBack, toolbarAdd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,25 +61,26 @@ public class FeedbackActivity extends AppCompatActivity {
         setContentView(R.layout.activity_feedback);
 
         rvFeedback = findViewById(R.id.rv_feedback);
-        toolbar = findViewById(R.id.toolbars);
-        btnAdd = findViewById(R.id.btn_add);
+        toolbarBack = findViewById(R.id.toolbar_back);
+        toolbarBack.setTitle("");
+        toolbarAdd = findViewById(R.id.toolbar_add);
 
         rvFeedback.setLayoutManager(new LinearLayoutManager(this));
         feedbackList = new ArrayList<>();
-        feedbackAdapter = new FeedbackAdapter(feedbackList);
+        feedbackAdapter = new FeedbackAdapter(feedbackList, this);
         rvFeedback.setAdapter(feedbackAdapter);
 
         // Make API call to fetch mess data
         fetchFeedbackData();
 
         /*Back to feedback*/
-        setSupportActionBar(toolbar);
+        setSupportActionBar(toolbarBack);
 
         // Enable the back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         /*Add Feedback*/
-        btnAdd.setOnClickListener(new View.OnClickListener() {
+        toolbarAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showAddFeedbackDialog();
@@ -109,7 +109,7 @@ public class FeedbackActivity extends AppCompatActivity {
     private void fetchFeedbackData() {
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.43.43:9090/feedback/listOfFeedbacks";
+        String url = "http://192.168.29.43:9090/feedback/listOfFeedbacks";
 
         RequestBody requestBody = new FormBody.Builder()
                 .build();
@@ -229,7 +229,7 @@ public class FeedbackActivity extends AppCompatActivity {
         int messId = mess.getInt("messId", 0);
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.43.43:9090/feedback/addOrEditFeedback";
+        String url = "http://192.168.29.43:9090/feedback/addOrEditFeedback";
 
         RequestBody requestBody = new FormBody.Builder()
                 .add("feedbackId", "0")
@@ -270,6 +270,108 @@ public class FeedbackActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             Toast.makeText(FeedbackActivity.this, "Failed to adding Feedback", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    /*Implement adapter class method for update*/
+    @Override
+    public void onFeedbackItemClick(final Feedback feedback) {
+        showUpdateFeedbackDialog(feedback);
+    }
+
+    /*ShowUpdateFeedbackDialog*/
+    private void showUpdateFeedbackDialog(Feedback feedback) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Update Feedback");
+
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_update_feedback, null);
+        final EditText etFeedbackName = view.findViewById(R.id.et_feedback);
+        etFeedbackName.setText(feedback.getFeedback());
+
+        builder.setView(view);
+
+        builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+             String feedbackName = etFeedbackName.getText().toString().trim();
+
+             if(!feedbackName.isEmpty()){
+                 // Make API call to update the mess
+                 updateFeedback(feedback, feedbackName);
+             }else{
+                 Toast.makeText(FeedbackActivity.this, "Please enter valid details", Toast.LENGTH_SHORT).show();
+             }
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    /*Update Method*/
+    private void updateFeedback(final Feedback feedback, String feedbackName) {
+
+        // Retrieve user data from SharedPreferences
+        SharedPreferences feedbacks = getSharedPreferences("FeedbackData", MODE_PRIVATE);
+        int feedbackId = feedbacks.getInt("feedbackId", 0);
+        SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
+        String userId = sharedPreferences.getString("userId", "");
+        SharedPreferences mess = getSharedPreferences("MessData", MODE_PRIVATE);
+        int messId = mess.getInt("messId", 0);
+
+        OkHttpClient client = new OkHttpClient();
+        String url = "http://192.168.29.43:9090/feedback/addOrEditFeedback";
+
+        RequestBody requestBody = new FormBody.Builder()
+                .add("feedbackId", String.valueOf(feedbackId))
+                .add("feedback", feedbackName)
+                .add("userId", userId)
+                .add("messId", String.valueOf(messId))
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(FeedbackActivity.this, "Failure to update feedback", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()){
+                    fetchFeedbackData(); // Refresh the mess list after updating a feedback
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(FeedbackActivity.this, "Feedback updated successfully", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(FeedbackActivity.this, "Failed to update feedback", Toast.LENGTH_SHORT).show();
                         }
                     });
                 }

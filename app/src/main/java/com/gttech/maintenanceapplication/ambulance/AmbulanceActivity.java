@@ -122,7 +122,7 @@ public class AmbulanceActivity extends AppCompatActivity {
     private void fetchAmbulanceData() {
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.43.43:9090/ambulance/listAllAmbulances";
+        String url = "http://192.168.29.43:9090/ambulance/listAllAmbulances";
 
         RequestBody requestBody = new FormBody.Builder()
                 .build();
@@ -249,7 +249,7 @@ public class AmbulanceActivity extends AppCompatActivity {
 
         OkHttpClient client = new OkHttpClient();
 
-        String url = "http://192.168.43.43:9090/ambulance/add";
+        String url = "http://192.168.29.43:9090/ambulance/add";
 
 
         // Create JSON object for the request body
@@ -321,7 +321,7 @@ public class AmbulanceActivity extends AppCompatActivity {
         int ambulance_id = ambulanceData.getInt("ambulanceId", 0);
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.43.43:9090/ambulance/changeStatus";
+        String url = "http://192.168.29.43:9090/ambulance/changeStatus";
 
         RequestBody requestBody = new FormBody.Builder()
                 .add("ambulance_id", String.valueOf(ambulance_id))

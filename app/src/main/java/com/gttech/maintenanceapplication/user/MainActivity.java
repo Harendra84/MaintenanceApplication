@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 OkHttpClient client = new OkHttpClient();
-                String url = "http://192.168.43.43:9090/auth/login";
+                String url = "http://192.168.29.43:9090/auth/login";
 
                 String email = etUsername.getText().toString().trim();
                 String password = etPassword.getText().toString().trim();

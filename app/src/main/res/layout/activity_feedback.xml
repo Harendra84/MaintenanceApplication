@@ -29,28 +29,41 @@
         android:layout_height="wrap_content">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbars"
+            android:id="@+id/toolbar_back"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
+            android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
+            android:layout_marginTop="5dp"
             android:elevation="4dp"
+            app:title=""
             android:layout_marginLeft="10dp"
-            app:title="Home"
-            app:navigationIcon="@drawable/ic_arrow_back_24">
+            app:navigationIcon="@drawable/back">
         </androidx.appcompat.widget.Toolbar>
 
-        <Button
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:layout_marginTop="5dp"
+            android:layout_marginStart="260dp"
+            android:elevation="4dp"
+            app:title=""
+            android:layout_marginLeft="15dp"
+            app:navigationIcon="@drawable/add64">
+        </androidx.appcompat.widget.Toolbar>
+
+       <!-- <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btn_add"
             android:layout_marginTop="5dp"
-            android:layout_marginLeft="100dp"
+            android:layout_marginLeft="160dp"
             android:padding="15dp"
             android:textSize="20dp"
             android:background="@drawable/custom_button_background"
             android:text="Give Feedback">
-        </Button>
+        </Button>-->
     </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView

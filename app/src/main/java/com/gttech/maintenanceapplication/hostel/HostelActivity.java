@@ -86,7 +86,7 @@ public class HostelActivity extends AppCompatActivity {
     private void fetchMessData() {
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.43.43:9090/hostel/getAllHostels";
+        String url = "http://192.168.29.43:9090/hostel/getAllHostels";
 
         RequestBody requestBody = new FormBody.Builder()
                 .build();

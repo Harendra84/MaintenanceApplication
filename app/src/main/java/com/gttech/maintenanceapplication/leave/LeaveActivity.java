@@ -106,7 +106,7 @@ public class LeaveActivity extends AppCompatActivity {
     /*List leave data*/
     private void fetchLeaveData() {
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.43.43:9090/leave/listOfLeavesByStudent";
+        String url = "http://192.168.29.43:9090/leave/listOfLeavesByStudent";
 
         // Retrieve user data from SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
@@ -240,7 +240,7 @@ public class LeaveActivity extends AppCompatActivity {
         int hostelId = hostel.getInt("hostel_id", 0);
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.43.43:9090/leave/addOrEditLeave";
+        String url = "http://192.168.29.43:9090/leave/addOrEditLeave";
 
         RequestBody requestBody = new FormBody.Builder()
                 .add("leaveId", "0")

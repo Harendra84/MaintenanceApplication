@@ -8,6 +8,6 @@
     <color name="colorPrimaryLight">#61AAC6</color>
     <color name="cardBackground">#FFC0CB</color>
     <color name="appText">#1E88E5</color>
-    <color name="cardViewColor">#EED2EE</color>
-    <color name="popupColor">#87CEEB</color>
+    <color name="cardViewColor">#FFFFFF</color>
+    <color name="popupColor">#FFFFFF</color>
 </resources>

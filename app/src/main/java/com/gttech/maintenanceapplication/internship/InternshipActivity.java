@@ -105,7 +105,7 @@ public class InternshipActivity extends AppCompatActivity {
     private void fetchInternshipData() {
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.43.43:9090/internship/listOfInternships";
+        String url = "http://192.168.29.43:9090/internship/listOfInternships";
 
         RequestBody requestBody = new FormBody.Builder()
                 .build();
@@ -234,7 +234,7 @@ public class InternshipActivity extends AppCompatActivity {
         int messId = mess.getInt("messId", 0);
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.43.43:9090/internship/addOrEditInternship";
+        String url = "http://192.168.29.43:9090/internship/addOrEditInternship";
 
         RequestBody requestBody = new FormBody.Builder()
                 .add("internshipId", "0")

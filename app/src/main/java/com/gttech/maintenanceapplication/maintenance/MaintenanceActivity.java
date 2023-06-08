@@ -109,7 +109,7 @@ public class MaintenanceActivity extends AppCompatActivity {
     private void fetchMaintenanceData() {
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.43.43:9090/maintenance/listOfMaintenanceData";
+        String url = "http://192.168.29.43:9090/maintenance/listOfMaintenanceData";
 
         RequestBody requestBody = new FormBody.Builder()
                 .build();
@@ -230,7 +230,7 @@ public class MaintenanceActivity extends AppCompatActivity {
         String roleType = sharedPreferences.getString("roleType", "");
 
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.43.43:9090/maintenance/addOrEditMaintenanceDetails";
+        String url = "http://192.168.29.43:9090/maintenance/addOrEditMaintenanceDetails";
 
         RequestBody requestBody = new FormBody.Builder()
                 .add("maintenanceId", "0")
