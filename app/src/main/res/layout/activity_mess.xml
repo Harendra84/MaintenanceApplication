@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryLight"
+    android:background="@color/recyclerViewBackground"
     android:orientation="vertical"
     tools:context=".mess.MessActivity">
 
+    <!--Navigation bar-->
     <androidx.appcompat.widget.Toolbar
-
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbar_back"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
@@ -21,35 +21,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Mess List"
-            android:textColor="@color/white"
+            android:text="Mess"
             android:textSize="20dp" />
-
     </androidx.appcompat.widget.Toolbar>
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- Add the ProgressBar for the loader -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center">
+        android:layout_below="@id/toolbar_back"
+        android:layout_centerInParent="true" />
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbars"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:background="@color/colorPrimary"
-            android:elevation="4dp"
-            app:title="Home"
-            app:navigationIcon="@drawable/ic_arrow_back_24">
-        </androidx.appcompat.widget.Toolbar>
-
-    </LinearLayout>
-
+    <!-- Add the recyclerview -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_mess"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="vertical">
-    </androidx.recyclerview.widget.RecyclerView>
+        android:layout_height="match_parent"
+        android:layout_below="@id/progress_bar"
+        android:orientation="vertical"
+        android:scrollbars="vertical"/>
 
-</LinearLayout>
+</RelativeLayout>

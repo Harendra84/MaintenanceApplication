@@ -14,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -21,9 +22,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.gttech.maintenanceapplication.R;
 import com.gttech.maintenanceapplication.dashboard.HomeActivity;
 import com.gttech.maintenanceapplication.internship.InternshipActivity;
@@ -50,20 +53,25 @@ public class MessActivity extends AppCompatActivity {
     private RecyclerView rvMess;
     private MessAdapter messAdapter;
     private List<Mess> messList;
-    private Toolbar toolbar;
+    private Toolbar toolbarBack;
+    private ProgressBar progressBar;
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mess);
 
-        rvMess = findViewById(R.id.rv_mess);
-        toolbar = findViewById(R.id.toolbars);
-        setSupportActionBar(toolbar);
+        progressBar = findViewById(R.id.progress_bar);
+        // Initialize the handler
+        handler = new Handler();
 
+        toolbarBack = findViewById(R.id.toolbar_back);
+        setSupportActionBar(toolbarBack);
         // Enable the back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        rvMess = findViewById(R.id.rv_mess);
         rvMess.setLayoutManager(new LinearLayoutManager(this));
         messList = new ArrayList<>();
         messAdapter = new MessAdapter(messList);
@@ -73,29 +81,22 @@ public class MessActivity extends AppCompatActivity {
         fetchMessData();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            // Handle the back button click
-            onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        // Handle the back button press
-        Intent intent = new Intent(this, HomeActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
     /*List mess data*/
     private void fetchMessData() {
 
+        showLoader(); // Show loader before making the API call
+
+        // Set a timeout of 10 seconds for hiding the loader
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                hideLoader(); // Hide loader after timeout
+            }
+        }, 10000);
+
+
         OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.29.43:9090/mess/listOfAllMess";
+        String url = "http://192.168.43.43:9090/mess/listOfAllMess";
 
         RequestBody requestBody = new FormBody.Builder()
                 .build();
@@ -112,6 +113,7 @@ public class MessActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        hideLoader(); // Hide loader in case of API call failure
                         Toast.makeText(MessActivity.this, "Failed to fetch mess data", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -119,6 +121,7 @@ public class MessActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                hideLoader(); // Hide loader in case of API call failure
                 if (response.isSuccessful()){
                     Integer messId = 0;
                     String messName = "";
@@ -145,6 +148,7 @@ public class MessActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 messAdapter.notifyDataSetChanged();
+                                hideLoader(); // Hide loader in case of API call failure
                             }
                         });
 
@@ -153,6 +157,7 @@ public class MessActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                hideLoader(); // Hide loader in case of API call failure
                                 Toast.makeText(MessActivity.this, "Failed to parse mess data", Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -167,6 +172,7 @@ public class MessActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            hideLoader(); // Hide loader in case of API call failure
                             Toast.makeText(MessActivity.this, "Failed to fetch mess data", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -174,4 +180,45 @@ public class MessActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Handle the back button click
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Handle the back button press
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    /*Show loader*/
+    private void showLoader() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.VISIBLE);
+                rvMess.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    /*Hide loder*/
+    private void hideLoader() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.GONE);
+                rvMess.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
 }

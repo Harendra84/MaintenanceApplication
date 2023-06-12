@@ -12,6 +12,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -20,11 +21,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.gttech.maintenanceapplication.R;
 import com.gttech.maintenanceapplication.dashboard.HomeActivity;
+import com.gttech.maintenanceapplication.feedback.FeedbackActivity;
 import com.gttech.maintenanceapplication.hostel.Hostel;
 import com.gttech.maintenanceapplication.hostel.HostelActivity;
 import com.gttech.maintenanceapplication.internship.InternshipActivity;
@@ -49,27 +53,31 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class AmbulanceActivity extends AppCompatActivity {
+public class AmbulanceActivity extends AppCompatActivity implements AmbulanceAdapter.AmbulanceItemClickListener{
 
     private RecyclerView rvAmbulance;
     private List<Ambulance> ambulanceList;
     private AmbulanceAdapter ambulanceAdapter;
-    private Toolbar toolbar;
-    private Button btnAdd;
-    private Button btnStatus;
+    private Toolbar toolbarBack;
+    private FloatingActionButton floatingAdd;
+    private ProgressBar progressBar;
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ambulance);
 
-        btnAdd = findViewById(R.id.btn_add);
-        //btnStatus =  findViewById(R.id.btn_status);
-        toolbar = findViewById(R.id.toolbars);
-        setSupportActionBar(toolbar);
+        progressBar = findViewById(R.id.progress_bar);
+        // Initialize the handler
+        handler = new Handler();
 
+        toolbarBack = findViewById(R.id.toolbar_back);
+        setSupportActionBar(toolbarBack);
         // Enable the back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        floatingAdd = findViewById(R.id.floating_add);
 
         rvAmbulance = findViewById(R.id.rv_ambulance);
         rvAmbulance.setLayoutManager(new LinearLayoutManager(this));
@@ -77,49 +85,33 @@ public class AmbulanceActivity extends AppCompatActivity {
         rvAmbulance.setVerticalScrollBarEnabled(true);
 
         ambulanceList = new ArrayList<>();
-        ambulanceAdapter = new AmbulanceAdapter(ambulanceList);
+        ambulanceAdapter = new AmbulanceAdapter(ambulanceList, this);
         rvAmbulance.setAdapter(ambulanceAdapter);
 
         // Make API call to fetch ambulance data
         fetchAmbulanceData();
 
         /*Add ambulance button click listener*/
-        btnAdd.setOnClickListener(new View.OnClickListener() {
+        floatingAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showAddAmbulanceDialog();
             }
         });
-
-        /*Change status of ambulance*//*
-        btnStatus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                changeStatus();
-            }
-        });*/
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            // Handle the back button click
-            onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        // Handle the back button press
-        Intent intent = new Intent(this, HomeActivity.class);
-        startActivity(intent);
-        finish();
     }
 
     /*List ambulance data*/
     private void fetchAmbulanceData() {
+
+        showLoader(); // Show loader before making the API call
+
+        // Set a timeout of 10 seconds for hiding the loader
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                hideLoader(); // Hide loader after timeout
+            }
+        }, 10000);
 
         OkHttpClient client = new OkHttpClient();
         String url = "http://192.168.29.43:9090/ambulance/listAllAmbulances";
@@ -139,6 +131,7 @@ public class AmbulanceActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        hideLoader(); // Hide loader in case of API call failure
                         Toast.makeText(AmbulanceActivity.this, "Failed to fetch ambulance data", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -146,6 +139,7 @@ public class AmbulanceActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                hideLoader(); // Hide loader after receiving the API response
                 if (response.isSuccessful()) {
                     int ambulanceId = 0;
                     String ambulanceName="";
@@ -175,6 +169,7 @@ public class AmbulanceActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 ambulanceAdapter.notifyDataSetChanged();
+                                hideLoader(); // Hide loader after updating the RecyclerView
                             }
                         });
                     } catch (Exception e) {
@@ -182,6 +177,7 @@ public class AmbulanceActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                hideLoader(); // Hide loader in case of JSON parsing failure
                                 Toast.makeText(AmbulanceActivity.this, "Failed to parse ambulance data", Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -195,10 +191,52 @@ public class AmbulanceActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            hideLoader(); // Hide loader in case of JSON parsing failure
                             Toast.makeText(AmbulanceActivity.this, "Failed to fetch ambulance data", Toast.LENGTH_SHORT).show();
                         }
                     });
                 }
+            }
+        });
+    }
+
+    /*Navigation bar back*/
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Handle the back button click
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Handle the back button press
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    /*Show loader*/
+    private void showLoader() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.VISIBLE);
+                rvAmbulance.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    /*Show hide*/
+    private void hideLoader() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.GONE);
+                rvAmbulance.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -310,88 +348,54 @@ public class AmbulanceActivity extends AppCompatActivity {
         });
     }
 
-    private void changeStatus() {
+    /*Implement adapter class method for update*/
+    @Override
+    public void onAmbulanceItemClick(Ambulance ambulance) {
+        showUpdateAmbulanceDialog(ambulance);
+    }
 
-        // Retrieve user data from SharedPreferences
-        SharedPreferences user = getSharedPreferences("UserData", MODE_PRIVATE);
-        SharedPreferences ambulanceData = getSharedPreferences("AmbulanceData", MODE_PRIVATE);
+    /*Show Update Ambulance Dialog for update*/
+    private void showUpdateAmbulanceDialog(Ambulance ambulance) {
 
-        String userId = user.getString("userId", "");
-        String roleType = user.getString("roleType", "");
-        int ambulance_id = ambulanceData.getInt("ambulanceId", 0);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Update Ambulance");
 
-        OkHttpClient client = new OkHttpClient();
-        String url = "http://192.168.29.43:9090/ambulance/changeStatus";
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_update_ambulance, null);
+        final EditText etAmbulanceName = view.findViewById(R.id.et_ambulance_name);
+        final EditText etAmbulancePlate = view.findViewById(R.id.et_ambulance_plate);
+        etAmbulanceName.setText(ambulance.getAmbulanceName());
+        etAmbulancePlate.setText(ambulance.getLicensePlate());
 
-        RequestBody requestBody = new FormBody.Builder()
-                .add("ambulance_id", String.valueOf(ambulance_id))
-                .add("roleType", roleType)
-                .build();
+        builder.setView(view);
 
-        Request request = new Request.Builder()
-                .url(url)
-                .post(requestBody)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
+        builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
             @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                e.printStackTrace();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(AmbulanceActivity.this, "Failed to fetch ambulance data", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
+            public void onClick(DialogInterface dialog, int which) {
+                String ambulanceName = etAmbulanceName.getText().toString().trim();
+                String ambulancePlate = etAmbulancePlate.getText().toString().trim();
 
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        String responseData = response.body().string();
-                        JSONArray jsonArray = new JSONArray(responseData);
-
-                        // Clear the existing ambulance list
-                        ambulanceList.clear();
-
-                        for (int i = 0; i < jsonArray.length(); i++) {
-
-                            JSONObject jsonObject = jsonArray.getJSONObject(i);
-                            int ambulanceId = jsonObject.getInt("ambulance_id");
-                            String ambulanceName = jsonObject.getString("ambulanceName");
-                            String ambulanceStatus = jsonObject.getString("ambulanceStatus");
-                            String licensePlate = jsonObject.getString("licensePlate");
-                            String lastMaintenanceDate = jsonObject.getString("lastMaintenanceDate");
-                            Ambulance ambulance = new Ambulance(ambulanceId, ambulanceName, ambulanceStatus, licensePlate,lastMaintenanceDate);
-                            ambulanceList.add(ambulance);
-                        }
-                        // Update the RecyclerView with the new ambulance data
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ambulanceAdapter.notifyDataSetChanged();
-                            }
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(AmbulanceActivity.this, "Failed to parse ambulance data", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                    fetchAmbulanceData();
+                if (!ambulanceName.isEmpty() || !ambulancePlate.isEmpty()) {
+                    // Make API call to update the mess
+                    updateAmbulance(ambulance, ambulanceName, ambulancePlate);
                 } else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(AmbulanceActivity.this, "Failed to fetch ambulance data", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    Toast.makeText(AmbulanceActivity.this, "Please enter valid details", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
+
+    /*Update Method for Ambulance*/
+    private void updateAmbulance(Ambulance ambulance, String ambulanceName, String ambulancePlate) {
+    }
+
 }

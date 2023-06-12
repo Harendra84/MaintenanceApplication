@@ -1,67 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/colorPrimaryLight"
+    android:background="@color/recyclerViewBackground"
     tools:context=".leave.LeaveActivity">
 
+    <!--Navigation bar-->
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbar_back"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Leave List"
+            android:text="Leave"
             android:gravity="center"
-            android:textColor="@color/white"
             android:textSize="20dp"/>
     </androidx.appcompat.widget.Toolbar>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <!-- Add the ProgressBar for the loader -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar_back"
+        android:layout_centerInParent="true" />
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbars"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:background="@color/colorPrimary"
-            android:elevation="4dp"
-            android:layout_marginLeft="10dp"
-            app:title="Home"
-            app:navigationIcon="@drawable/ic_arrow_back_24">
-        </androidx.appcompat.widget.Toolbar>
-
-        <Button
-            android:id="@+id/btn_add"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add Leave"
-            android:layout_marginTop="5dp"
-            android:layout_marginLeft="140dp"
-            android:padding="15dp"
-            android:textSize="20dp"
-            android:background="@drawable/custom_button_background">
-        </Button>
-
-    </LinearLayout>
-
+    <!-- Add the recyclerview -->
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_below="@id/progress_bar"
             android:scrollbars="vertical"
-            android:layout_marginTop="10dp"
             android:id="@+id/rv_leave">
-
         </androidx.recyclerview.widget.RecyclerView>
 
-</LinearLayout>
+    <!--Floating action button-->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floating_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/colorPrimary"
+        android:src="@drawable/add"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp" />
+
+</RelativeLayout>

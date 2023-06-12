@@ -15,20 +15,20 @@ import com.gttech.maintenanceapplication.dashboard.HomeActivity;
 
 public class HostelAttendanceActivity extends AppCompatActivity {
 
-    private Toolbar toolbar;
+    private Toolbar toolbarBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hostel_attendance);
 
-        toolbar = findViewById(R.id.toolbars);
-        setSupportActionBar(toolbar);
-
+        toolbarBack = findViewById(R.id.toolbar_back);
+        setSupportActionBar(toolbarBack);
         // Enable the back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {

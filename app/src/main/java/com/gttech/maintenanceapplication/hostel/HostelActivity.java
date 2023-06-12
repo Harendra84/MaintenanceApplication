@@ -9,9 +9,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.gttech.maintenanceapplication.R;
@@ -39,22 +41,25 @@ public class HostelActivity extends AppCompatActivity {
     private RecyclerView rvHostel;
     private List<Hostel> hostelList;
     private HostelAdapter hostelAdapter;
-    private Toolbar toolbar;
-    private Button btnAdd;
+    private Toolbar toolbarBack;
+    private ProgressBar progressBar;
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hostel);
 
-        rvHostel = findViewById(R.id.rv_hostel);
-        toolbar = findViewById(R.id.toolbars);
-        toolbar = findViewById(R.id.toolbars);
-        setSupportActionBar(toolbar);
+        progressBar = findViewById(R.id.progress_bar);
+        // Initialize the handler
+        handler = new Handler();
 
+        toolbarBack = findViewById(R.id.toolbar_back);
+        setSupportActionBar(toolbarBack);
         // Enable the back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        rvHostel = findViewById(R.id.rv_hostel);
         rvHostel.setLayoutManager(new LinearLayoutManager(this));
         hostelList = new ArrayList<>();
         hostelAdapter = new HostelAdapter(hostelList);
@@ -64,26 +69,19 @@ public class HostelActivity extends AppCompatActivity {
         fetchMessData();
 
     }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            // Handle the back button click
-            onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        // Handle the back button press
-        Intent intent = new Intent(this, HomeActivity.class);
-        startActivity(intent);
-        finish();
-    }
 
     /*List hostel data*/
     private void fetchMessData() {
+
+        showLoader(); // Show loader before making the API call
+
+        // Set a timeout of 10 seconds for hiding the loader
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                hideLoader(); // Hide loader after timeout
+            }
+        }, 10000);
 
         OkHttpClient client = new OkHttpClient();
         String url = "http://192.168.29.43:9090/hostel/getAllHostels";
@@ -103,6 +101,7 @@ public class HostelActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        hideLoader(); // Hide loader in case of API call failure
                         Toast.makeText(HostelActivity.this, "Failed to fetch hostel data", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -110,6 +109,7 @@ public class HostelActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                hideLoader(); // Hide loader in case of API call failure
                 if (response.isSuccessful()) {
                     int hostelId = 0;
                     String hostelName ="";
@@ -134,6 +134,7 @@ public class HostelActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 hostelAdapter.notifyDataSetChanged();
+                                hideLoader(); // Hide loader in case of API call failure
                             }
                         });
 
@@ -142,6 +143,7 @@ public class HostelActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                hideLoader(); // Hide loader in case of API call failure
                                 Toast.makeText(HostelActivity.this, "Failed to parse hostel data", Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -155,6 +157,7 @@ public class HostelActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            hideLoader(); // Hide loader in case of API call failure
                             Toast.makeText(HostelActivity.this, "Failed to featch hostel data", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -163,7 +166,44 @@ public class HostelActivity extends AppCompatActivity {
         });
     }
 
-    /*Dailog box*/
-    private void showAddHostelDialog() {
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Handle the back button click
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Handle the back button press
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    /*Show loader*/
+    private void showLoader() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.VISIBLE);
+                rvHostel.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    /*Show hide*/
+    private void hideLoader() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.GONE);
+                rvHostel.setVisibility(View.VISIBLE);
+            }
+        });
     }
 }

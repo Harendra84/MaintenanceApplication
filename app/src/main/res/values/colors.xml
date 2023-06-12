@@ -2,12 +2,16 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="no">#039BE5</color>
+    <color name="itemColor">#7CB342</color>
     <color name="colorPrimary">#49839a</color>
-    <color name="colorPrimaryDark">#f29ea9</color>
     <color name="colorAccent">#49839a</color>
+    <color name="popupColor">#E6E6E6</color>
+    <color name="cardBackground">#FFFFFF</color>
+    <color name="colorPrimaryDark">#f29ea9</color>
     <color name="colorPrimaryLight">#61AAC6</color>
-    <color name="cardBackground">#FFC0CB</color>
-    <color name="appText">#1E88E5</color>
-    <color name="cardViewColor">#FFFFFF</color>
-    <color name="popupColor">#FFFFFF</color>
+    <color name="recyclerViewBackground">#E6E6E6</color>
+    <color name="login_background_color">#FFAABBCC</color>
+    <color name="home_background_color">#FFAABBCC</color>
+    <color name="login_button_background_color">#2196F3</color>
 </resources>

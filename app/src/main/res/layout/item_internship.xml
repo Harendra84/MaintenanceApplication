@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardBackgroundColor="@color/cardViewColor"
-    android:layout_margin="10dp"
-    android:padding="5dp"
-    android:elevation="4dp"
-    android:radius="8dp">
+    android:layout_margin="4dp"
+    app:cardBackgroundColor="@color/cardBackground"
+    app:cardCornerRadius="4dp"
+    app:cardElevation="4dp"
+    app:cardUseCompatPadding="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,50 +18,64 @@
             android:id="@+id/tv_internship_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:padding="3dp"/>
+            android:padding="8dp"
+            android:textColor="@color/no"
+            android:textSize="20sp"
+            android:textStyle="normal" />
 
         <TextView
-        android:id="@+id/tv_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:padding="3dp"/>
+            android:id="@+id/tv_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:textColor="@color/itemColor"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <TextView
-        android:id="@+id/tv_registration_number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:padding="3dp"/>
+            android:id="@+id/tv_registration_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:textColor="@color/itemColor"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <TextView
-        android:id="@+id/tv_purpose"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:padding="3dp"/>
+            android:id="@+id/tv_purpose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:textColor="@color/itemColor"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <TextView
-        android:id="@+id/tv_phone_no"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:padding="3dp"/>
+            android:id="@+id/tv_phone_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:textColor="@color/itemColor"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <TextView
-        android:id="@+id/tv_email_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:padding="3dp"/>
+            android:id="@+id/tv_email_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:textColor="@color/itemColor"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-        <!--<TextView
-        android:id="@+id/tv_no_of_days"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:padding="3dp"/>-->
+        <TextView
+            android:id="@+id/tv_no_of_days"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:textColor="@color/itemColor"
+            android:textSize="20sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

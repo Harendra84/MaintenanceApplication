@@ -3,11 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardBackgroundColor="@color/cardViewColor"
-    android:layout_margin="10dp"
-    android:padding="5dp"
-    android:elevation="4dp"
-    android:radius="8dp">
+    app:cardBackgroundColor="@color/cardBackground"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="4dp"
+    app:cardElevation="4dp"
+    app:cardUseCompatPadding="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,38 +17,56 @@
         android:id="@+id/tv_leave_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:padding="3dp"/>
+        android:textColor="@color/no"
+        android:textSize="20sp"
+        android:textStyle="normal"
+        android:padding="8dp"/>
+
     <TextView
         android:id="@+id/tv_leave_type"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:padding="3dp"/>
+        android:textColor="@color/itemColor"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:padding="8dp"/>
+
     <TextView
         android:id="@+id/tv_leave_reason"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:padding="3dp"/>
+        android:textColor="@color/itemColor"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:padding="8dp"/>
+
     <TextView
         android:id="@+id/tv_leave_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:padding="3dp"/>
+        android:textColor="@color/itemColor"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:padding="8dp"/>
+
     <TextView
         android:id="@+id/tv_parent_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:padding="3dp"/>
+        android:textColor="@color/itemColor"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:padding="8dp"/>
+
     <TextView
         android:id="@+id/tv_parent_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:padding="3dp"/>
+        android:textColor="@color/itemColor"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:padding="8dp"/>
+
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

@@ -1,77 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/recyclerViewBackground"
     android:orientation="vertical"
-    android:background="@color/colorPrimaryLight"
     tools:context=".feedback.FeedbackActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbar_back"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Feedback List"
-            android:gravity="center"
-            android:textColor="@color/white"
-            android:textSize="20dp"/>
+            android:textSize="20dp"
+            android:text="Feedback"
+            android:gravity="center"/>
     </androidx.appcompat.widget.Toolbar>
 
-    <LinearLayout
+    <!-- Add the ProgressBar for the loader -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar_back"
+        android:layout_centerInParent="true" />
+
+    <!-- Add the recyclerview -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_feedback"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar_back"
+        android:scrollbars="vertical">
+    </androidx.recyclerview.widget.RecyclerView>
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_back"
-            android:layout_width="wrap_content"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimary"
-            android:layout_marginTop="5dp"
-            android:elevation="4dp"
-            app:title=""
-            android:layout_marginLeft="10dp"
-            app:navigationIcon="@drawable/back">
-        </androidx.appcompat.widget.Toolbar>
+    <!--Floating action button-->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floating_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:src="@drawable/add" />
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_add"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
-            android:layout_marginTop="5dp"
-            android:layout_marginStart="260dp"
-            android:elevation="4dp"
-            app:title=""
-            android:layout_marginLeft="15dp"
-            app:navigationIcon="@drawable/add64">
-        </androidx.appcompat.widget.Toolbar>
-
-       <!-- <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/btn_add"
-            android:layout_marginTop="5dp"
-            android:layout_marginLeft="160dp"
-            android:padding="15dp"
-            android:textSize="20dp"
-            android:background="@drawable/custom_button_background"
-            android:text="Give Feedback">
-        </Button>-->
-    </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="vertical"
-            android:layout_marginTop="10dp"
-            android:id="@+id/rv_feedback">
-        </androidx.recyclerview.widget.RecyclerView>
-
-</LinearLayout>
+</RelativeLayout>

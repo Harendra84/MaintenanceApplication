@@ -5,12 +5,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.opengl.EGLExt;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.gttech.maintenanceapplication.R;
 import com.gttech.maintenanceapplication.dashboard.HomeActivity;
 
@@ -19,7 +24,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -49,17 +53,17 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 OkHttpClient client = new OkHttpClient();
-                String url = "http://192.168.29.43:9090/auth/login";
+                String url = "http://192.168.43.43:9090/auth/login";
 
                 String email = etUsername.getText().toString().trim();
                 String password = etPassword.getText().toString().trim();
 
                 if (email.isEmpty()) {
-                    Toast.makeText(MainActivity.this, "Please enter username!", Toast.LENGTH_SHORT).show();
+                    showSnackbar("Please enter username!", Snackbar.LENGTH_SHORT);
                     return;
                 }
                 if (password.isEmpty()) {
-                    Toast.makeText(MainActivity.this, "Please enter password!", Toast.LENGTH_SHORT).show();
+                    showSnackbar("Please enter password!", Snackbar.LENGTH_SHORT);
                     return;
                 }
 
@@ -102,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(MainActivity.this, "Failed to featch login", Toast.LENGTH_SHORT).show();
+                                        showSnackbar( "Failed to featch login", Toast.LENGTH_SHORT);
                                     }
                                 });
                             }
@@ -118,17 +122,17 @@ public class MainActivity extends AppCompatActivity {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(MainActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+                                    showSnackbar("Login successful", Toast.LENGTH_LONG);
                                     startActivity(new Intent(MainActivity.this, HomeActivity.class));
                                     finish();
                                 }
                             });
 
-                        }else{
+                        } else {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(MainActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
+                                   showSnackbar("Login failed", Toast.LENGTH_SHORT);
                                 }
                             });
                         }
@@ -136,5 +140,22 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private void showSnackbar(String message, int duration) {
+        View rootView = findViewById(android.R.id.content);
+        Snackbar snackbar = Snackbar.make(rootView, message, duration);
+
+        // Set text color
+        snackbar.setActionTextColor(Color.WHITE);
+        // Set background color
+        snackbar.getView().setBackgroundColor(Color.DKGRAY);
+        // Set duration
+        snackbar.setDuration(duration);
+        // Set the Snackbar to be displayed at the top
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) snackbar.getView().getLayoutParams();
+        params.gravity = Gravity.TOP;
+        snackbar.getView().setLayoutParams(params);
+        snackbar.show();
     }
 }

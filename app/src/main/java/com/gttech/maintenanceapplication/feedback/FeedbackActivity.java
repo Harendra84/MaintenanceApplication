@@ -14,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -21,10 +22,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.gttech.maintenanceapplication.R;
 import com.gttech.maintenanceapplication.ambulance.AmbulanceActivity;
 import com.gttech.maintenanceapplication.dashboard.HomeActivity;
@@ -48,23 +51,33 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class FeedbackActivity extends AppCompatActivity implements FeedbackAdapter.FeedbackItemClickListener{
+public class FeedbackActivity extends AppCompatActivity implements FeedbackAdapter.FeedbackItemClickListener {
 
     private RecyclerView rvFeedback;
     private List<Feedback> feedbackList;
     private FeedbackAdapter feedbackAdapter;
     private Toolbar toolbarBack, toolbarAdd;
+    private FloatingActionButton floatingAdd;
+    private ProgressBar progressBar;
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feedback);
 
-        rvFeedback = findViewById(R.id.rv_feedback);
-        toolbarBack = findViewById(R.id.toolbar_back);
-        toolbarBack.setTitle("");
-        toolbarAdd = findViewById(R.id.toolbar_add);
+        progressBar = findViewById(R.id.progress_bar);
+        // Initialize the handler
+        handler = new Handler();
 
+        toolbarBack = findViewById(R.id.toolbar_back);
+        setSupportActionBar(toolbarBack);
+        // Enable the back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        floatingAdd = findViewById(R.id.floating_add);
+
+        rvFeedback = findViewById(R.id.rv_feedback);
         rvFeedback.setLayoutManager(new LinearLayoutManager(this));
         feedbackList = new ArrayList<>();
         feedbackAdapter = new FeedbackAdapter(feedbackList, this);
@@ -73,40 +86,27 @@ public class FeedbackActivity extends AppCompatActivity implements FeedbackAdapt
         // Make API call to fetch mess data
         fetchFeedbackData();
 
-        /*Back to feedback*/
-        setSupportActionBar(toolbarBack);
-
-        // Enable the back button
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         /*Add Feedback*/
-        toolbarAdd.setOnClickListener(new View.OnClickListener() {
+        floatingAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showAddFeedbackDialog();
             }
         });
     }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            // Handle the back button click
-            onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        // Handle the back button press
-        Intent intent = new Intent(this, HomeActivity.class);
-        startActivity(intent);
-        finish();
-    }
 
     /*List feedback data*/
     private void fetchFeedbackData() {
+
+        showLoader(); // Show loader before making the API call
+
+        // Set a timeout of 10 seconds for hiding the loader
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                hideLoader(); // Hide loader after timeout
+            }
+        }, 10000);
 
         OkHttpClient client = new OkHttpClient();
         String url = "http://192.168.29.43:9090/feedback/listOfFeedbacks";
@@ -126,6 +126,7 @@ public class FeedbackActivity extends AppCompatActivity implements FeedbackAdapt
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        hideLoader(); // Hide loader in case of API call failure
                         Toast.makeText(FeedbackActivity.this, "Failed to fetch feedback data", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -133,56 +134,102 @@ public class FeedbackActivity extends AppCompatActivity implements FeedbackAdapt
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-               if (response.isSuccessful()){
-                   int feedId = 0;
-                   String feed = "";
-                   try {
-                       String responseData = response.body().string();
-                       JSONArray jsonArray = new JSONArray(responseData);
+                hideLoader(); // Hide loader after receiving the API response
+                if (response.isSuccessful()) {
+                    int feedId = 0;
+                    String feed = "";
+                    try {
+                        String responseData = response.body().string();
+                        JSONArray jsonArray = new JSONArray(responseData);
 
-                       // Clear the existing feedback list
-                       feedbackList.clear();
+                        // Clear the existing feedback list
+                        feedbackList.clear();
 
-                       // Parse the JSON data and add it to the feed list
-                       for (int i = 0; i < jsonArray.length(); i++) {
+                        // Parse the JSON data and add it to the feed list
+                        for (int i = 0; i < jsonArray.length(); i++) {
 
-                           JSONObject jsonObject = jsonArray.getJSONObject(i);
-                           feedId = jsonObject.getInt("feedbackId");
-                           feed = jsonObject.getString("feedback");
-                           Feedback  feedback =  new Feedback(feedId, feed);
-                           feedbackList.add(feedback);
-                       }
-                       runOnUiThread(new Runnable() {
-                           @Override
-                           public void run() {
-                               feedbackAdapter.notifyDataSetChanged();
-                           }
-                       });
-                   } catch (Exception e) {
-                       e.printStackTrace();
-                       runOnUiThread(new Runnable() {
-                           @Override
-                           public void run() {
-                               Toast.makeText(FeedbackActivity.this, "Failed to parse feedback data", Toast.LENGTH_SHORT).show();
-                           }
-                       });
-                   }
-                   // Save feed id details in SharedPreferences
-                   SharedPreferences sharedPreferences = getSharedPreferences("FeedbackData", MODE_PRIVATE);
-                   SharedPreferences.Editor editor = sharedPreferences.edit();
-                   editor.putInt("feedbackId", feedId);
-                   editor.apply();
-               }else{
-                   runOnUiThread(new Runnable() {
-                       @Override
-                       public void run() {
-                           Toast.makeText(FeedbackActivity.this, "Failed to fetch mess data", Toast.LENGTH_SHORT).show();
-                       }
-                   });
-               }
+                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+                            feedId = jsonObject.getInt("feedbackId");
+                            feed = jsonObject.getString("feedback");
+                            Feedback feedback = new Feedback(feedId, feed);
+                            feedbackList.add(feedback);
+                        }
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                feedbackAdapter.notifyDataSetChanged();
+                                hideLoader(); // Hide loader after receiving the API response
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                hideLoader(); // Hide loader after receiving the API response
+                                Toast.makeText(FeedbackActivity.this, "Failed to parse feedback data", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                    // Save feed id details in SharedPreferences
+                    SharedPreferences sharedPreferences = getSharedPreferences("FeedbackData", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putInt("feedbackId", feedId);
+                    editor.apply();
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            hideLoader(); // Hide loader after receiving the API response
+                            Toast.makeText(FeedbackActivity.this, "Failed to fetch mess data", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
             }
         });
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Handle the back button click
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Handle the back button press
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    /*Show loader*/
+    private void showLoader() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.VISIBLE);
+                rvFeedback.setVisibility(View.GONE);
+            }
+        });
+    }
+
+
+    /*Show hide*/
+    private void hideLoader() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressBar.setVisibility(View.GONE);
+                rvFeedback.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
 
     /*Feedback alert dialog */
     private void showAddFeedbackDialog() {
@@ -198,10 +245,10 @@ public class FeedbackActivity extends AppCompatActivity implements FeedbackAdapt
             public void onClick(DialogInterface dialog, int which) {
                 String feedback = etFeedback.getText().toString();
 
-                if (!feedback.isEmpty()){
+                if (!feedback.isEmpty()) {
                     // Add the new mess item to the list
                     addFeedback(feedback);
-                }else{
+                } else {
                     Toast.makeText(FeedbackActivity.this, "Please enter valid details", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -257,7 +304,7 @@ public class FeedbackActivity extends AppCompatActivity implements FeedbackAdapt
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful()){
+                if (response.isSuccessful()) {
                     fetchFeedbackData();
                     runOnUiThread(new Runnable() {
                         @Override
@@ -265,7 +312,7 @@ public class FeedbackActivity extends AppCompatActivity implements FeedbackAdapt
                             Toast.makeText(FeedbackActivity.this, "Feedback added successfully", Toast.LENGTH_SHORT).show();
                         }
                     });
-                }else{
+                } else {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -279,32 +326,22 @@ public class FeedbackActivity extends AppCompatActivity implements FeedbackAdapt
 
     /*Implement adapter class method for update*/
     @Override
-    public void onFeedbackItemClick(final Feedback feedback) {
+    public void onFeedbackItemClick(Feedback feedback) {
         showUpdateFeedbackDialog(feedback);
     }
 
-    /*ShowUpdateFeedbackDialog*/
-    private void showUpdateFeedbackDialog(Feedback feedback) {
+    /*Implement adapter class method for delete*/
+    @Override
+    public void onFeedbackItemDeleteClick(Feedback feedback) {
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Update Feedback");
+        builder.setTitle("Delete Feedback");
+        builder.setMessage("Are you sure you want to delete?");
 
-        View view = LayoutInflater.from(this).inflate(R.layout.dialog_update_feedback, null);
-        final EditText etFeedbackName = view.findViewById(R.id.et_feedback);
-        etFeedbackName.setText(feedback.getFeedback());
-
-        builder.setView(view);
-
-        builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-             String feedbackName = etFeedbackName.getText().toString().trim();
-
-             if(!feedbackName.isEmpty()){
-                 // Make API call to update the mess
-                 updateFeedback(feedback, feedbackName);
-             }else{
-                 Toast.makeText(FeedbackActivity.this, "Please enter valid details", Toast.LENGTH_SHORT).show();
-             }
+                deleteFeedback(feedback);
             }
         });
 
@@ -319,7 +356,106 @@ public class FeedbackActivity extends AppCompatActivity implements FeedbackAdapt
         dialog.show();
     }
 
-    /*Update Method*/
+    /*Delete Method for Feedback*/
+    private void deleteFeedback(Feedback feedback) {
+
+        // Retrieve user data from SharedPreferences
+        SharedPreferences feedbacks = getSharedPreferences("FeedbackData", MODE_PRIVATE);
+        int feedbackId = feedbacks.getInt("feedbackId", 0);
+        SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
+        String userId = sharedPreferences.getString("userId", "");
+        String roleType = sharedPreferences.getString("roleType", "");
+
+        OkHttpClient client = new OkHttpClient();
+
+        String url = "http://192.168.29.43:9090/feedback/deleteFeedback";
+
+        // Create the form body with mess details
+        FormBody.Builder formBuilder = new FormBody.Builder()
+                .add("feedbackId", String.valueOf(feedbackId))
+                .add("userId", userId)
+                .add("roleType",roleType);
+
+        // Create the request body
+        RequestBody requestBody = formBuilder.build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(FeedbackActivity.this, "Failed to delete feedback", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    fetchFeedbackData(); // Refresh the mess list after deleting a mess
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(FeedbackActivity.this, "Feedback deleted successfully", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(FeedbackActivity.this, "Failed to delete feedback", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    /*Show Update Feedback Dialog for update*/
+    private void showUpdateFeedbackDialog(Feedback feedback) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Update Feedback");
+
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_update_feedback, null);
+        final EditText etFeedbackName = view.findViewById(R.id.et_feedback);
+        etFeedbackName.setText(feedback.getFeedback());
+
+        builder.setView(view);
+
+        builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String feedbackName = etFeedbackName.getText().toString().trim();
+
+                if (!feedbackName.isEmpty()) {
+                    // Make API call to update the mess
+                    updateFeedback(feedback, feedbackName);
+                } else {
+                    Toast.makeText(FeedbackActivity.this, "Please enter valid details", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    /*Update Method for Feedback*/
     private void updateFeedback(final Feedback feedback, String feedbackName) {
 
         // Retrieve user data from SharedPreferences
@@ -359,7 +495,7 @@ public class FeedbackActivity extends AppCompatActivity implements FeedbackAdapt
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful()){
+                if (response.isSuccessful()) {
                     fetchFeedbackData(); // Refresh the mess list after updating a feedback
                     runOnUiThread(new Runnable() {
                         @Override
@@ -367,7 +503,7 @@ public class FeedbackActivity extends AppCompatActivity implements FeedbackAdapt
                             Toast.makeText(FeedbackActivity.this, "Feedback updated successfully", Toast.LENGTH_SHORT).show();
                         }
                     });
-                }else {
+                } else {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
